@@ -1,7 +1,7 @@
 {
-  "name": "pages",
+  "name": "website",
   "version": "0.1.0",
-  "homepage": "https://janzenchoi.github.io/pages",
+  "homepage": "https://janzenchoi.github.io/website",
   "private": true,
   "dependencies": {
     "@testing-library/dom": "^10.4.1",
