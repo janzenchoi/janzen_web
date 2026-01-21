@@ -5,7 +5,7 @@ import { ViewportProvider } from "./context/Viewport";
 import { Template } from './page/Template';
 import { Settings } from './page/Settings';
 import { getStoredValue } from "./helper/storage";
-import { DEFAULT_MODE } from "./helper/brightness";
+import { updateSafeAreaColour, DEFAULT_MODE } from "./helper/brightness";
 
 function App() {
   
@@ -16,6 +16,7 @@ function App() {
       document.documentElement.setAttribute("colour-theme", saved);
     else
       document.documentElement.setAttribute("colour-theme", DEFAULT_MODE);
+    updateSafeAreaColour()
   });
 
   // Define colour template

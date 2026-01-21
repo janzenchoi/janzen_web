@@ -26,6 +26,19 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>React App</title>
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem("colour-theme") || "dark";
+        document.documentElement.setAttribute("colour-theme", savedTheme);
+
+        const meta = document.getElementById("theme-color-meta");
+        if (meta) {
+          const style = getComputedStyle(document.documentElement);
+          const colour1 = style.getPropertyValue("--colour-1").trim();
+          meta.setAttribute("content", colour1);
+        }
+      })();
+    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

@@ -7,11 +7,11 @@ export const DEFAULT_MODE = "dark";
  */
 export function setDarkMode(enabled) {
   const colour_theme = enabled ? "dark" : "light";
-
-  // Update theme
   document.documentElement.setAttribute("colour-theme", colour_theme);
+  updateSafeAreaColour();
+}
 
-  // Update safe ares colours
+export function updateSafeAreaColour() {
   const colour1 = getComputedStyle(document.documentElement).getPropertyValue("--colour-1").trim();
   const themeMeta = document.getElementById("theme-color-meta");
   if (themeMeta)
