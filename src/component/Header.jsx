@@ -102,6 +102,7 @@ export const Header = () => {
     <Link to="/" style={{ textDecoration: "none" }}>
       <div style={logoStyle}>JANZEN</div>
     </Link>
+    {/* <ReactToggle input={Boolean(isMobile)} onChange={(next) => setMobileMode(next)} disabled={Boolean(isMobile)}/> */}
 
     {!mobileMode && 
       <div style={tabMenuStyle}>
@@ -152,7 +153,7 @@ export const Header = () => {
           <ColourThemeToggle/>
         </div>
         <div style={burgerItemStyle}>
-          <div style={textStyle}>Mobile version</div>
+          <div style={textStyle}>Mobile Mode</div>
           <ReactToggle input={Boolean(isMobile)} onChange={(next) => setMobileMode(next)} disabled={Boolean(isMobile)}/>
         </div>
       </BurgerDropdown>
