@@ -45,19 +45,30 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
     cursor: "pointer",
   };
 
+  // Style for right-side menu
+  const rightMenuStyle = {
+    display: "flex",
+    alignItems: "center",
+    position: "absolute",
+    right: "-1rem",
+  };
+  
   // Define tab styles
   const tabMenuStyle = {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
     height: "30px",
-  }
+    opacity: mobileMode ? 0 : 1,
+    pointerEvents: mobileMode ? "none" : "auto",
+    transition: "opacity 0.5s",
+  };
   const tabItemStyle = {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     padding: "0px 16px 0px 16px",
-  }
+  };
   const tabDividerStyle = {
     height: "100%",
     width: "1px",
@@ -65,15 +76,28 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
     boxShadow: "1px 0px 4px var(--colour-3)",
     backgroundColor: "var(--colour-4)",
     opacity: 0.8,
-  }
+  };
+
+  // Burger menu transition
+  const burgerTransitionStyle = {
+    transition: "opacity 0.5s",
+    opacity: mobileMode ? 1 : 0,
+    pointerEvents: mobileMode ? "auto" : "none",
+    right: "2rem",
+  };
 
   // Return header object
   return <div style={headerStyle}>
+
+    {/* Logo */}
     <Link to="/" style={{ textDecoration: "none" }}>
       <div style={logoStyle}>JANZEN</div>
     </Link>
 
-    {!mobileMode && 
+    {/* Right-side menu */}
+    <div style={rightMenuStyle}>
+
+      {/* Desktop Mode Options */}
       <div style={tabMenuStyle}>
         <div style={tabItemStyle}>
           <div style={textStyle}>About</div>
@@ -99,10 +123,9 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
           </TextDropdown>
         </div>
       </div>
-    }
 
-    {mobileMode && 
-      <BurgerDropdown>
+      {/* Mobile Mode Options */}
+      <BurgerDropdown style={burgerTransitionStyle}>
         <div style={dropdownItemStyle}>
           <div style={textStyle}>About</div>
         </div>
@@ -123,7 +146,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
         <DarkModeItem/>
         <MobileModeItem forceMobile={forceMobile} setForceMobile={setForceMobile}/>
       </BurgerDropdown>
-    }
+    </div>
   </div>;
 };
 

@@ -40,7 +40,8 @@ export const Dropdown = ({ open, onClose, children, ignoreRefs=[] }) => {
     position: "absolute",
     top: "16px",
     right: 0,
-    display: open ? "flex" : "none",
+    display: "flex",
+    pointerEvents: open ? "auto" : "none",
     flexDirection: "column",
     justifyContent: "center",
     padding: "8px 12px",
@@ -50,7 +51,7 @@ export const Dropdown = ({ open, onClose, children, ignoreRefs=[] }) => {
     zIndex: 1000,
     opacity: open ? 1 : 0,
     pointerEvents: open ? "auto" : "none",
-    transition: "opacity 0.2s ease",
+    transition: "opacity 0.3s ease",
     minWidth: "200px",
   };
 
