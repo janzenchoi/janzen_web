@@ -6,15 +6,18 @@ import ColourThemeToggle from './button/ColourThemeToggle';
 import ReactToggle from './button/ReactToggle';
 import { useViewport } from "../helper/Viewport";
 import { MIN_WIDTH } from "../helper/layout";
+import { setStoredValue } from "../helper/storage";
 
 /**
  * Fixed header
  * @param {boolean} mobileMode whether to use mobile or desktop view
  * @param {boolean} forceMobile whether to force mobile mode
  * @param {function} setForceMobile function to set mobile mode
+ * @param {boolean} colourTheme the theme to colour the site
+ * @param {function} setColourTheme function to set colour theme
  * @returns fixed header object
  */
-export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
+export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, setColourTheme }) => {
 
   // Define header style
   const headerStyle = {
@@ -118,7 +121,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
         <div style={tabDividerStyle}/>
         <div style={tabItemStyle}>
           <TextDropdown text={"Settings"} style={textStyle}>
-            <DarkModeItem/>
+            <DarkModeItem colourTheme={colourTheme} setColourTheme={setColourTheme}/>
             <MobileModeItem forceMobile={forceMobile} setForceMobile={setForceMobile}/>
           </TextDropdown>
         </div>
@@ -143,7 +146,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile }) => {
           <div style={textStyle}>Activities</div>
         </div>
         <div style={dropdownDividerStyle}/>
-        <DarkModeItem/>
+        <DarkModeItem colourTheme={colourTheme} setColourTheme={setColourTheme}/>
         <MobileModeItem forceMobile={forceMobile} setForceMobile={setForceMobile}/>
       </BurgerDropdown>
     </div>
@@ -165,12 +168,14 @@ const textStyle = {
 
 /**
  * Item containing toggle for dark mode
+ * @param {boolean} colourTheme the theme to colour the site
+ * @param {function} setColourTheme function to set colour theme
  * @returns dark mode toggle item
  */
-const DarkModeItem = () => {
+const DarkModeItem = ({ colourTheme, setColourTheme }) => {
   return <div style={dropdownItemStyle}>
     <div style={textStyle}>Dark Mode</div>
-    <ColourThemeToggle/>
+    <ColourThemeToggle colourTheme={colourTheme} setColourTheme={setColourTheme}/>
   </div>;
 }
 
@@ -182,11 +187,19 @@ const DarkModeItem = () => {
  */
 const MobileModeItem = ({ forceMobile, setForceMobile }) => {
   const { isMobile } = useViewport();
+
+  // Define change function
+  const onChange = () => {
+    setStoredValue("force-mobile", !forceMobile);
+    setForceMobile(!forceMobile);
+  };
+
+  // Return mobile mode item
   return <div style={dropdownItemStyle}>
     <div style={textStyle}>Mobile Mode</div>
     <ReactToggle
       input    = {isMobile || forceMobile}
-      onChange = {() => {setForceMobile(!forceMobile)}}
+      onChange = {onChange}
       disabled = {Boolean(isMobile)}
     />
   </div>

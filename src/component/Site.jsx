@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { HashRouter, Routes, Route } from 'react-router-dom';
-import { Header } from './Header';
+import { HashRouter, Routes, Route } from "react-router-dom";
+import { Header } from "./Header";
 import { useViewport } from "../helper/Viewport";
-import { Template } from './page/Template';
-import { Settings } from './page/Settings';
+import { Template } from "./page/Template";
+import { Settings } from "./page/Settings";
+import { DEFAULT_MODE } from "../helper/brightness";
+import { getStoredValue } from "../helper/storage";
 
 /**
  * Site
@@ -11,10 +13,15 @@ import { Settings } from './page/Settings';
  */
 export const Site = () => {
   
+  // Deals with dark / light mode
+  const [colourTheme, setColourTheme] = useState(() => {
+    return getStoredValue("colour-theme") || DEFAULT_MODE;
+  });
+
   // Deals with mobile / desktop state
   const { isMobile } = useViewport();
-  const [ mobileMode, setMobileMode ] = useState(isMobile);
-  const [ forceMobile, setForceMobile ] = useState(false);
+  const [ forceMobile, setForceMobile ] = useState(getStoredValue("force-mobile") === "true");
+  const [ mobileMode, setMobileMode ] = useState(isMobile || forceMobile);
   useEffect(() => {
     setMobileMode(isMobile || forceMobile);
   }, [isMobile, forceMobile]);
@@ -29,10 +36,10 @@ export const Site = () => {
   // Returns the site
   return <div style={siteStyle}>
     <HashRouter>
-      <Header mobileMode={mobileMode} forceMobile={forceMobile} setForceMobile={setForceMobile}/>
+      <Header mobileMode={mobileMode} forceMobile={forceMobile} setForceMobile={setForceMobile} colourTheme={colourTheme} setColourTheme={setColourTheme}/>
       <Routes>
-        <Route path='/' element={<Template/>}/>
-        <Route path='/settings' element={<Settings/>}/>
+        <Route path="/" element={<Template/>}/>
+        <Route path="/settings" element={<Settings/>}/>
       </Routes>
     </HashRouter>
   </div>

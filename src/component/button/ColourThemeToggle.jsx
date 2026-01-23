@@ -4,13 +4,11 @@ import { setStoredValue, getStoredValue } from "../../helper/storage";
 
 /**
  * Creates a toggle switch that changes the colour theme.
- *
+ * @param {boolean} colourTheme the theme to colour the site
+ * @param {function} setColourTheme function to set colour theme
  * @returns {string} toggle switch
  */
-function ColourThemeToggle() {
-  const [colourTheme, setColourTheme] = useState(() => {
-    return getStoredValue("colour-theme") || DEFAULT_MODE;
-  });
+function ColourThemeToggle({colourTheme, setColourTheme}) {
 
   // Toggle handler
   const toggleHandler = () => {
