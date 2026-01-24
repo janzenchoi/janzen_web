@@ -26,12 +26,12 @@ code {
 }
 
 [colour-theme="dark"] {
-  --colour-0: rgb(10, 10, 10);
-  --colour-1: rgb(20, 20, 20); /* For index.html safe area default colour: #141414 */
-  --colour-2: rgb(30, 30, 30);
-  --colour-3: rgb(50, 50, 50);
-  --colour-4: rgb(80, 80, 80);
-  --colour-5: rgb(200, 200, 200);
-  --colour-6: rgb(255, 255, 255);
+  --colour-0: rgb(20, 20, 20); /* For index.html safe area default colour: #141414 */
+  --colour-1: rgb(30, 30, 30);
+  --colour-2: rgb(50, 50, 50);
+  --colour-3: rgb(80, 80, 80);
+  --colour-4: rgb(120, 120, 120);
+  --colour-5: rgb(180, 180, 180);
+  --colour-6: rgb(240, 240, 240);
   --switch-colour: rgb(45, 193, 136);
 }
