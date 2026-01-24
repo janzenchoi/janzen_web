@@ -10,7 +10,7 @@ export const Card = ({ mobileMode, title, children }) => {
 
   // Container style for the card
   const containerStyle = {
-    padding: "1rem 1rem 1rem 1rem",
+    padding: "0.6rem 1rem 1rem 1rem",
     backgroundColor: "var(--colour-0)",
     marginTop: "0.4rem",
     marginBottom: "0.4rem",
@@ -21,25 +21,19 @@ export const Card = ({ mobileMode, title, children }) => {
   const titleStyle = {
     width: "100%",
     fontWeight: 600,
-    fontSize: "1.4rem",
+    fontSize: "1.2rem",
     color: "var(--colour-6)",
-    paddingBottom: "1rem",
+    paddingBottom: "0.6rem",
   };
 
   // Return body object
   return (
     <div style={containerStyle}>
       <div style={titleStyle}>{title}</div>
+      <div style={dividerStyle}/>
       {children}
     </div>
   );
-}
-
-/**
- * Divider style
- */
-export const dividerStyle = {
-  width: "100%",
 }
 
 /**
@@ -54,3 +48,14 @@ export const textStyle = {
   color: "var(--colour-5)",
   textAlign: "justify"
 };
+
+/**
+ * Divider style
+ */
+export const dividerStyle = {
+  width: "100%",
+  height: "1px",
+  margin: "0 0 0.6rem 0",
+  backgroundColor: "var(--colour-3)",
+  opacity: 0.8,
+}
