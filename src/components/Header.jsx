@@ -28,9 +28,8 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     height: "var(--header-height)",
     backgroundColor: "var(--colour-0)",
     transition: "all 0.3s",
-    boxShadow: "0 0px 6px var(--colour-3)",
+    boxShadow: "0 0px 6px var(--colour-4)",
     zIndex: 1000,
-    padding: "0 1rem",
     opacity: 0.9,
     display: "flex",
     flexDirection: "row",
@@ -42,6 +41,8 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     boxSizing: "border-box",
     display: "flex",
     alignItems: "center",
+    marginLeft: "1rem",
+    marginRight: "1rem",
   };
 
   // Define logo style
@@ -51,7 +52,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     justifyContent: "center",
     fontWeight: 600,
     fontSize: "2rem",
-    color: "var(--colour-5)",
+    color: "var(--colour-6)",
     cursor: "pointer",
   };
 
@@ -75,7 +76,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     transition: "opacity 0.5s",
   };
   const tabItemStyle = {
-      display: "flex",
+    display: "flex",
     flexDirection: "row",
     justifyContent: "center",
     padding: "0px 16px 0px 16px",
@@ -174,7 +175,7 @@ const textStyle = {
   justifyContent: "center",
   fontWeight: 400,
   fontSize: "1rem",
-  color: "var(--colour-5)",
+  color: "var(--colour-6)",
   cursor: "pointer",
 }
 

@@ -29,7 +29,6 @@ export const Site = () => {
   const siteStyle = {
     backgroundColor: "var(--colour-0)",
     transition: "background-color 0.3s",
-    minWidth: "400px",
   };
 
   // Returns the site

@@ -11,9 +11,9 @@ export const ProfileImage = ({toggle}) => {
   // Style of images
   const imageContainerStyle = {
     position: "relative",
-    height: "150px",
-    width: "150px",
-    border: "4px solid var(--colour-2)",
+    height: "100px",
+    width: "100px",
+    border: "1px solid var(--colour-3)",
   };
   const imageStyle = {
     position: "absolute",

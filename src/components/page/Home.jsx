@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ProfileImage } from "../content/ProfileImage";
-// import { Container } from "../content/Container";
+import { Card } from "../content/Card";
 
 /**
  * Home page
@@ -19,8 +19,9 @@ export const Home = ({mobileMode, colourTheme}) => {
   // Return home object
   return (
     <div>
-      <ProfileImage toggle={darkMode}/>
-      {/* <Container toggle={darkMode}/> */}
+      <Card title="About">
+        <ProfileImage toggle={darkMode}/>
+      </Card>
     </div>
   );
 }

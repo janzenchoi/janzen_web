@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import { Home } from "./page/Home";
 import { Template } from "./page/Template";
+import { MAX_WIDTH } from "../helper/layout";
 
 /**
  * The body of the page
@@ -11,23 +12,33 @@ import { Template } from "./page/Template";
 export const Body = ({ mobileMode, colourTheme }) => {
 
   // Main style for the body
-  const mainStyle = {
+  const outerStyle = {
+    position: "fixed",
     paddingTop: "var(--header-height)",
-    minHeight: "2000px",
-    // minHeight: "calc(100vh - var(--header-height))",
-    width: "100%",
+    minHeight: "calc(100vh - var(--header-height))",
+    width: "calc(100% - 2rem)",
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
+    margin: "1rem",
+    boxSizing: "border-box",
+    backgroundColor: "var(--colour-0)",
   }
+  const innerStyle = {
+    maxWidth: MAX_WIDTH,
+    width: "100%",
+    boxSizing: "border-box",
+  };
 
   // Return body object
   return (
-    <div style={mainStyle}>
-      <Routes>
-        <Route path="/" element={<Home mobileMode={mobileMode} colourTheme={colourTheme}/>}/>
-        <Route path="/template" element={<Template/>}/>
-      </Routes>
+    <div style={outerStyle}>
+      <div style={innerStyle}>
+        <Routes>
+          <Route path="/" element={<Home mobileMode={mobileMode} colourTheme={colourTheme}/>}/>
+          <Route path="/template" element={<Template/>}/>
+        </Routes>
+      </div>
     </div>
   );
 }
