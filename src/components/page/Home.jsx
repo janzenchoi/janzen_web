@@ -78,7 +78,7 @@ const AboutCard = ({ mobileMode, darkMode }) => {
   const MobileObject = () => {
     return <div style={{ ...textStyle, display: "flex", flexDirection: "column", gap: "0.8rem" }}>
       <div>{text1}</div>
-      <div style={{ height: "320px" }}>
+      <div style={{ height: "240px" }}>
         <ProfileImage darkMode={darkMode}/>
       </div>
       <div style={{ color: "var(--colour-4)" }}>{text2}</div>
