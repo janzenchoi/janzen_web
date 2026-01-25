@@ -24,7 +24,7 @@ export const ProfileImage = ({toggle}) => {
     width: "100%",
     height: "100%",
     objectFit: "cover",
-    objectPosition: "65% 50%",
+    objectPosition: "65% 35%",
     transition: "opacity 0.3s ease"
   };
 
