@@ -40,8 +40,8 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     boxSizing: "border-box",
     display: "flex",
     alignItems: "center",
-    paddingLeft: "1rem",
-    paddingRight: "1rem",
+    marginLeft: "1rem",
+    marginRight: "1rem",
   };
 
   // Define logo style
@@ -78,7 +78,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    padding: "0px 16px 0px 16px",
+    padding: "0px 0.8rem 0px 0.8rem",
   };
   const tabDividerStyle = {
     height: "100%",
@@ -111,23 +111,11 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
         {/* Desktop Mode Options */}
         <div style={tabMenuStyle}>
           <div style={tabItemStyle}>
-            <div style={textStyle}>About</div>
-          </div>
-          <div style={tabItemStyle}>
-            <div style={textStyle}>Experience</div>
-          </div>
-          <div style={tabItemStyle}>
-            <div style={textStyle}>Projects</div>
-          </div>
-          <div style={tabItemStyle}>
-            <div style={textStyle}>Contact</div>
+            <div style={textStyle}>Resume</div>
           </div>
           <div style={tabDividerStyle}/>
           <div style={tabItemStyle}>
-            <TextDropdown text={"Activities"} style={textStyle} closeOnChange={mobileMode}>
-              <DarkModeItem colourTheme={colourTheme} setColourTheme={setColourTheme}/>
-              <MobileModeItem forceMobile={forceMobile} setForceMobile={setForceMobile}/>
-            </TextDropdown>
+            <div style={textStyle}>Activities</div>
           </div>
           <div style={tabDividerStyle}/>
           <div style={tabItemStyle}>

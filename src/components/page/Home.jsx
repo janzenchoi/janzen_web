@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { ProfileImage } from "../content/ProfileImage";
-import { Card, dividerStyle, textStyle } from "../content/Card";
+import { Card, textStyle } from "../content/Card";
 
 /**
  * Home page
@@ -19,9 +19,7 @@ export const Home = ({mobileMode, colourTheme}) => {
   // Return home object
   return (
     <div>
-      <Card title="About">
-        <ProfileImage toggle={darkMode}/>
-      </Card>
+      <AboutCard mobileMode={mobileMode} darkMode={darkMode}/>
       <Card title="Experience">
         <div style={textStyle}>{lorem}</div>
       </Card>
@@ -38,5 +36,52 @@ export const Home = ({mobileMode, colourTheme}) => {
     </div>
   );
 }
+
+/**
+ * About card
+ * @param {boolean} mobileMode whether to use mobile or desktop view
+ * @param {boolean} darkMode whether to use dark or light mode
+ * @returns about card for mobile mode
+ */
+const AboutCard = ({ mobileMode, darkMode }) => {
+  
+  // Text
+  const text1 = "Hello, I'm Janzen.";
+  const text2 = "I'm a PhD-trained engineer with experience in machine learning, optimisation, and computational modelling.";
+  const text3 = "I have decent programming skills (e.g., Bash, C, C++, Java, JavaScript, Python, SQL) and proficiency with a range of software tools (e.g., CAD, FEM, Microsoft Suite)."
+
+  // Returns the desktop version
+  const DesktopObject = () => {
+    return <div style={{ display: "flex", flexDirection: "row", gap: "1rem" }}>
+      <div style={{ display: "flex", flexDirection: "column", flex: "0 0 40%" }}>
+        <ProfileImage toggle={darkMode}/>
+      </div>
+      <div style={{ ...textStyle, display: "flex", flexDirection: "column", flex: 1 }}>
+        <div style={{ marginBottom: "0.8rem" }}>{text1}</div>
+        <div style={{ marginBottom: "0.8rem", color: "var(--colour-4)" }}>{text2}</div>
+        <div style={{ color: "var(--colour-4)" }}>{text3}</div>
+      </div>
+    </div>
+  };
+
+  // Returns the mobile version
+  const MobileObject = () => {
+    return <div style={{ ...textStyle, display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+      <div>{text1}</div>
+      <div style={{ height: "160px" }}>
+        <ProfileImage toggle={darkMode}/>
+      </div>
+      <div style={{ color: "var(--colour-4)" }}>{text2}</div>
+      <div style={{ color: "var(--colour-4)" }}>{text3}</div>
+    </div>
+  };
+
+  // Return about card object
+  return <Card title="About">
+    {!mobileMode && <DesktopObject/>}
+    {mobileMode && <MobileObject/>}
+  </Card>
+};
+
 
 const lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";

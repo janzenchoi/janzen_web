@@ -1,5 +1,5 @@
 // Default colour theme
-export const DEFAULT_MODE = "dark";
+export const DEFAULT_MODE = "light";
 
 /**
  * Alternates between dark and light mode
@@ -11,6 +11,9 @@ export function setDarkMode(enabled) {
   updateSafeAreaColour();
 }
 
+/**
+ * Function to update the colour of the safe area
+ */
 export function updateSafeAreaColour() {
   const colour = getComputedStyle(document.documentElement).getPropertyValue("--colour-0").trim();
   const themeMeta = document.getElementById("theme-color-meta");

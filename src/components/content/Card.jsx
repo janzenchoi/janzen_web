@@ -2,11 +2,10 @@
 /**
  * Card for the body
  * @param {string} title card title
- * @param {boolean} mobileMode whether to use mobile or desktop view
  * @param {*} children card items
  * @returns card object
  */
-export const Card = ({ mobileMode, title, children }) => {
+export const Card = ({ title, children }) => {
 
   // Container style for the card
   const containerStyle = {
@@ -15,6 +14,8 @@ export const Card = ({ mobileMode, title, children }) => {
     marginTop: "0.4rem",
     marginBottom: "0.4rem",
     boxShadow: "0 0px 3px var(--colour-3)",
+    borderRadius: "4px",
+    overflow: "hidden",
   };
 
   // Style for title
@@ -30,11 +31,23 @@ export const Card = ({ mobileMode, title, children }) => {
   return (
     <div style={containerStyle}>
       <div style={titleStyle}>{title}</div>
-      <div style={dividerStyle}/>
+      <div style={horizontalDividerStyle}/>
       {children}
     </div>
   );
 }
+
+/**
+ * Creates a bullet point
+ * @param {string} text text for the bullet point
+ * @returns text in a bullet
+ */
+export const Bullet = ({ text }) => {
+    return <div style={{ display: "flex", alignItems: "flex-start", marginBottom: "0.4rem" }}>
+      <span style={textStyle}>•</span>
+      <span style={{ ...textStyle, marginLeft: "0.8rem" }}>{text}</span>
+    </div>;
+};
 
 /**
  * Text style
@@ -50,12 +63,23 @@ export const textStyle = {
 };
 
 /**
- * Divider style
+ * Horizontal divider style
  */
-export const dividerStyle = {
+export const horizontalDividerStyle = {
   width: "100%",
   height: "1px",
-  margin: "0 0 0.6rem 0",
+  margin: "0 0 1rem 0",
+  backgroundColor: "var(--colour-3)",
+  opacity: 0.8,
+}
+
+/**
+ * Vertical divider style
+ */
+export const verticalDividerStyle = {
+  height: "100%",
+  width: "1px",
+  margin: "0 0.6rem 0 0.6rem",
   backgroundColor: "var(--colour-3)",
   opacity: 0.8,
 }

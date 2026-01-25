@@ -35,7 +35,7 @@ export const Site = () => {
   return <div style={siteStyle}>
     <HashRouter>
       <Header mobileMode={mobileMode} forceMobile={forceMobile} setForceMobile={setForceMobile} colourTheme={colourTheme} setColourTheme={setColourTheme}/>
-      <Body mobileMode={mobileMode} colourTheme={colourTheme}/>
+      <div><Body mobileMode={mobileMode} colourTheme={colourTheme}/></div>
     </HashRouter>
   </div>
 }

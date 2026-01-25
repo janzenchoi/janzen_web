@@ -1,35 +1,38 @@
-import { useState } from "react";
-import profileDayImage from "../../assets/profile_day.jpg";
-import profileNightImage from "../../assets/profile_night.jpg";
+import profileLightImage from "../../assets/profile_light_far.png";
+import profileDarkImage from "../../assets/profile_dark_far.png";
 
 /**
- * Bistate image
- * @param {boolean} toggle variable that toggles the image
- * @returns bistate image object
+ * Profile image
+ * @param {boolean} toggle first variable that toggles the image
+ * @returns profile image object
  */
 export const ProfileImage = ({toggle}) => {
-  const [expanded, setExpanded] = useState(false);
 
   // Style of images
   const imageContainerStyle = {
+    minWidth: "100px",
+    width: "100%",
+    height: "100%",
     position: "relative",
-    height: expanded ? "200px": "100px",
-    width: expanded ? "200px": "100px",
-    border: "1px solid var(--colour-3)",
-    cursor: "pointer",
+    borderRadius: "4px",
+    overflow: "hidden",
+    flexShrink: 0,
   };
   const imageStyle = {
     position: "absolute",
-    transition: "opacity 0.5s",
-    height: "100%",
+    inset: 0,
     width: "100%",
-  }
+    height: "100%",
+    objectFit: "cover",
+    objectPosition: "65% 50%",
+    transition: "opacity 0.3s ease"
+  };
 
   // Return image object
   return (
-    <div style={imageContainerStyle} onClick={() => setExpanded(prev => !prev)}>
-      <img src={profileNightImage} style={{ ...imageStyle, opacity: toggle ? 1 : 0}}/>
-      <img src={profileDayImage} style={{ ...imageStyle, opacity: toggle ? 0 : 1}}/>
+    <div style={imageContainerStyle}>
+      <img src={profileDarkImage}  style={{ ...imageStyle, opacity: toggle ? 1 : 0}}/>
+      <img src={profileLightImage} style={{ ...imageStyle, opacity: !toggle ? 1 : 0}}/>
     </div>
   );
 }
