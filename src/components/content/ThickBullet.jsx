@@ -79,12 +79,16 @@ export const ThickBullet = ({ mobileMode, darkMode, iconLight, iconDark, title, 
 
   // For additional description
   const AdditionalDescription = () => {
+    const descriptionStyle = {
+      ...textStyle,
+      textAlign: mobileMode ? "start" : "justify",
+    };
     return (
       <div>
         {description.map((text, idx) => (
           <div key={idx}>
             <div style={dividerStyle}/>
-            <div style={textStyle}>{text}</div>
+            <div style={descriptionStyle}>{text}</div>
           </div>
         ))}
       </div>

@@ -31,12 +31,11 @@ export const AboutCard = ({ mobileMode, darkMode }) => {
   // Returns the mobile version
   const MobileObject = () => {
     return <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-      <div style={titleStyle}>{text1}</div>
+      <div style={{ ...titleStyle, textAlign: "center" }}>{text1}</div>
       <div style={{ height: "200px" }}>
         <ProfileImage darkMode={darkMode}/>
       </div>
-      <div style={textStyle}>{text2}</div>
-      <div style={textStyle}>{text3}</div>
+      <div style={{ ...textStyle, textAlign: "center" }}>{text2} {text3}</div>
     </div>
   };
 
