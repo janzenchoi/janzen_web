@@ -25,20 +25,14 @@ export const Home = ({mobileMode, colourTheme}) => {
       <AboutCard mobileMode={mobileMode} darkMode={darkMode}/>
       <EducationCard mobileMode={mobileMode} darkMode={darkMode}/>
       <ExperienceCard mobileMode={mobileMode} darkMode={darkMode}/>
-      <Card title="Projects"></Card>
+      <Card title="Projects">
+        <div style={titleStyle}>{lorem}</div>
+      </Card>
       <AchievementsCard mobileMode={mobileMode} darkMode={darkMode}/>
 
       <Card title="Contact">
         <div style={titleStyle}>{lorem}</div>
       </Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
-      <Card title="Temp"><div style={titleStyle}>{lorem}</div></Card>
     </div>
   );
 }

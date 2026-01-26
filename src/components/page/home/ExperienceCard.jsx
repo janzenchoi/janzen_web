@@ -32,7 +32,7 @@ export const ExperienceCard = ({ mobileMode, darkMode }) => {
       subtitle={"Student Researcher"}
       description={[
         "Hybrid (Sydney, Australia)",
-        "Developed and calibrated materials models for predicting the the creep and tensile deformation behaviour of Alloy 617; the research was conducted as part of my Honours project and PhD candidature"
+        "Developed and calibrated materials models for predicting the creep and tensile deformation behaviour of Alloy 617; the research was conducted as part of my Honours project and PhD candidature"
       ]}
       iconLight={anstoLight}
       iconDark={anstoDark}
