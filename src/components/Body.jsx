@@ -13,8 +13,8 @@ export const Body = ({ mobileMode, colourTheme }) => {
 
   // Container styles
   const outerStyle = {
-    paddingTop: HEADER_HEIGHT,
-    minHeight: `calc(100vh - ${FOOTER_HEIGHT})`,
+    marginTop: HEADER_HEIGHT,
+    minHeight: `calc(100vh - ${FOOTER_HEIGHT} - ${HEADER_HEIGHT})`,
     width: "100%",
     display: "flex",
     justifyContent: "center",
