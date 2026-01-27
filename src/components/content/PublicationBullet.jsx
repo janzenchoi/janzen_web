@@ -66,6 +66,7 @@ export const PublicationBullet = ({ mobileMode, darkMode, title, subtitle, descr
 
   // For hyperlinks
   const Hyperlink = () => {
+    const fullLink = `https://${link}`;
     const hyperlinkStyle = {
       display: "flex",
       flexDirection: mobileMode ? "column" : "row",
@@ -74,7 +75,7 @@ export const PublicationBullet = ({ mobileMode, darkMode, title, subtitle, descr
     };
     return (
       <div style={hyperlinkStyle}>
-        {link !== "" && <a href={link} target="_blank" rel="noopener noreferrer">
+        {link !== "" && <a href={fullLink} target="_blank" rel="noopener noreferrer">
           <div style={{ ...textStyle, textDecoration: "underline" }}>{link}</div>
         </a>}
         {!mobileMode && <div style={{ width: "0.4rem" }}/>}
