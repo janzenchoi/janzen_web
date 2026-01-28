@@ -37,7 +37,7 @@ export const Site = () => {
   // FG object
   const FgObject = () => {
     const janzenFgStyle = {
-      top: `calc(${HEADER_HEIGHT} - 40px)`,
+      top: `calc(${HEADER_HEIGHT} - 42px)`,
       height: "40px",
       width: "auto",
       display: "block",

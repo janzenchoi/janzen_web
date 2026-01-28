@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card } from "../../content/Card";
+import { SkillsCard } from "./SkillsCard";
 import { EducationCard } from "./EducationCard";
 import { ExperienceCard } from "./ExperienceCard";
 import { AchievementsCard } from "./AchievementsCard";
@@ -22,7 +22,7 @@ export const Resume = ({mobileMode, colourTheme}) => {
   // Return home object
   return (
     <div>
-      <Card title="Skills"></Card>
+      <SkillsCard mobileMode={mobileMode} darkMode={darkMode}/>
       <EducationCard mobileMode={mobileMode} darkMode={darkMode}/>
       <ExperienceCard mobileMode={mobileMode} darkMode={darkMode}/>
       <AchievementsCard mobileMode={mobileMode} darkMode={darkMode}/>

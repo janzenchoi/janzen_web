@@ -7,10 +7,10 @@ import unswLight from "../../../assets/logo/unsw_light.png";
 import bssm from "../../../assets/logo/bssm.png";
 
 /**
- * Achievement card
+ * Achievements card
  * @param {boolean} mobileMode whether to use mobile or desktop view
  * @param {boolean} darkMode whether to use dark or light mode
- * @returns achievement card for mobile mode
+ * @returns achievements card for mobile mode
  */
 export const AchievementsCard = ({ mobileMode, darkMode }) => {
   const [open, setOpen] = useState(false);

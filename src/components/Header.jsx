@@ -111,7 +111,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
               <div style={textStyle} onClick={() => navigate("/home")}>Home</div>
             </TabItem>
             <TabItem>
-              <div style={textStyle} onClick={() => navigate("/resume")}>Resume</div>
+              <div style={textStyle} onClick={() => navigate("/resume")}>Resumé</div>
             </TabItem>
             <TabItem>
               <div style={textStyle} onClick={() => navigate("/activities")}>Activities</div>
@@ -135,7 +135,7 @@ export const Header = ({ mobileMode, forceMobile, setForceMobile, colourTheme, s
               <div style={textStyle} onClick={() => navigate("/home")}>Home</div>
             </DropdownItem>
             <DropdownItem>
-              <div style={textStyle} onClick={() => navigate("/resume")}>Resume</div>
+              <div style={textStyle} onClick={() => navigate("/resume")}>Resumé</div>
             </DropdownItem>
             <DropdownItem>
               <div style={textStyle} onClick={() => navigate("/activities")}>Activities</div>

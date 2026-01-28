@@ -11,8 +11,8 @@ export const AboutCard = ({ mobileMode, darkMode }) => {
   
   // Text
   const text1 = "Hello, I'm Janzen Choi.";
-  const text2 = "I'm a PhD-trained engineer and programmer with experience in machine learning, optimisation, and computational modelling.";
-  const text3 = "I have solid programming skills (e.g., Bash, C, C++, Java, JavaScript, Python, SQL) and proficiency with a range of software tools (e.g., CAD, FEM, MS Suite)."
+  const text2 = "I am a PhD-trained engineer and programmer.";
+  const text3 = "I am passionate about solving challenging problems and contributing to projects with real-world impact."
 
   // Returns the desktop version
   const DesktopObject = () => {
@@ -35,8 +35,7 @@ export const AboutCard = ({ mobileMode, darkMode }) => {
       <div style={{ height: "200px" }}>
         <ProfileImage darkMode={darkMode}/>
       </div>
-      <div style={textStyle}>{text2}</div>
-      <div style={textStyle}>{text3}</div>
+      <div style={textStyle}>{text2} {text3}</div>
     </div>
   };
 
