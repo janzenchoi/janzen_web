@@ -11,7 +11,11 @@ import { titleStyle, subtitleStyle, textStyle, horizontalDividerStyle } from "./
 export const TextBullet = ({ mobileMode, darkMode, title, subtitle }) => {
   
   // Define symbol
-  const symbol = mobileMode ? "•" : "●";
+  const symbolStyle = {
+    ...titleStyle,
+    fontSize: mobileMode ? "0.6rem" : "1rem",
+    paddingTop: mobileMode ? "0.3rem" : "0rem",
+  };
 
   // Container styles
   const outerContainer = {
@@ -30,7 +34,7 @@ export const TextBullet = ({ mobileMode, darkMode, title, subtitle }) => {
   // Return text bullet
   return (
     <div style={outerContainer}>
-      <div style={titleStyle}>{symbol}</div>
+      <div style={symbolStyle}>{"●"}</div>
       <div style={innerContainer}>
         <div style={{ ...titleStyle, textAlign: "start" }}>{title}</div>
         <div style={{ ...subtitleStyle, textAlign: "start" }}>{subtitle}</div>
