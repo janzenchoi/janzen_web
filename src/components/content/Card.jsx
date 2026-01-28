@@ -1,10 +1,11 @@
 /**
  * Card for the body
+ * @param {boolean} mobileMode whether to use mobile or desktop view
  * @param {string} title card title
  * @param {*} children card items
  * @returns card object
  */
-export const Card = ({ title, children }) => {
+export const Card = ({ mobileMode, title, children }) => {
 
   // Container style for the card
   const containerStyle = {
@@ -14,7 +15,7 @@ export const Card = ({ title, children }) => {
     marginTop: "0.4rem",
     marginBottom: "0.4rem",
     boxShadow: "0 0px 3px var(--colour-4)",
-    borderRadius: "8px",
+    borderRadius: mobileMode ? "0px" : "8px",
     overflow: "hidden",
   };
 

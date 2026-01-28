@@ -60,7 +60,7 @@ export const EducationCard = ({ mobileMode, darkMode }) => {
 
   // Return about card object
   return (
-    <Card title={"Education"}>
+    <Card mobileMode={mobileMode} title={"Education"}>
       <Bullet3/>
       <Bullet2/>
       <Bullet1/>

@@ -10,7 +10,7 @@ import { Card, titleStyle, textStyle } from "../../content/Card";
 export const AboutCard = ({ mobileMode, darkMode }) => {
   
   // Text
-  const text1 = "Hello, I'm Janzen.";
+  const text1 = "Hello, I'm Janzen Choi.";
   const text2 = "I'm a PhD-trained engineer and programmer with experience in machine learning, optimisation, and computational modelling.";
   const text3 = "I have solid programming skills (e.g., Bash, C, C++, Java, JavaScript, Python, SQL) and proficiency with a range of software tools (e.g., CAD, FEM, MS Suite)."
 
@@ -41,7 +41,7 @@ export const AboutCard = ({ mobileMode, darkMode }) => {
   };
 
   // Return about card object
-  return <Card title="About">
+  return <Card mobileMode={mobileMode} title="About">
     {!mobileMode && <DesktopObject/>}
     {mobileMode && <MobileObject/>}
   </Card>

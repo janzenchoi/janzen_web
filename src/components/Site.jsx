@@ -3,9 +3,11 @@ import { HashRouter } from "react-router-dom";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { useViewport } from "../helper/Viewport";
-import { DEFAULT_MODE } from "../helper/constant";
+import { DEFAULT_MODE, HEADER_HEIGHT } from "../helper/constant";
 import { getStoredValue } from "../helper/storage";
 import { Body } from "./Body";
+import fg_dark from "../assets/janzen/fg_dark.png";
+import fg_light from "../assets/janzen/fg_light.png";
 
 /**
  * Site
@@ -31,12 +33,30 @@ export const Site = () => {
     backgroundColor: "var(--colour-0)",
     transition: "all 0.3s ease",
   };
+  
+  // FG object
+  const FgObject = () => {
+    const janzenFgStyle = {
+      top: `calc(${HEADER_HEIGHT} - 40px)`,
+      height: "40px",
+      width: "auto",
+      display: "block",
+      position: "absolute",
+      left: "calc(50% - 5rem)",
+      zIndex: 10,
+    };
+    const fg_image = colourTheme === "dark" ? fg_dark : fg_light;
+    return <img style={janzenFgStyle} src={fg_image}/>;
+  };
 
   // Returns the site
   return <div style={siteStyle}>
     <HashRouter>
+      <FgObject/>
       <Header mobileMode={mobileMode} forceMobile={forceMobile} setForceMobile={setForceMobile} colourTheme={colourTheme} setColourTheme={setColourTheme}/>
-      <div><Body mobileMode={mobileMode} colourTheme={colourTheme}/></div>
+      <div>
+        <Body mobileMode={mobileMode} colourTheme={colourTheme}/>
+      </div>
       <Footer/>
     </HashRouter>
   </div>

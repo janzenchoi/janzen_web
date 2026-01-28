@@ -139,7 +139,7 @@ export const ExperienceCard = ({ mobileMode, darkMode }) => {
 
   // Return about card object
   return (
-    <Card title={"Experience"}>
+    <Card mobileMode={mobileMode} title={"Experience"}>
       <div>
         <Bullet7/>
         <Bullet6/>

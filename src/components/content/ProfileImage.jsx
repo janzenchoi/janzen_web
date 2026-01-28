@@ -1,5 +1,5 @@
-import profileLightImage from "../../assets/profile/light.png";
-import profileDarkImage from "../../assets/profile/dark.png";
+import profileLightImage from "../../assets/janzen/profile_light.png";
+import profileDarkImage from "../../assets/janzen/profile_dark.png";
 
 /**
  * Profile image

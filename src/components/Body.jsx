@@ -20,6 +20,7 @@ export const Body = ({ mobileMode, colourTheme }) => {
     justifyContent: "center",
     boxSizing: "border-box",
     backgroundColor: "var(--colour-1)",
+    boxShadow: "0 0px 2px var(--colour-5)",
     transition: "background-color 0.3s ease",
   };
   const innerStyle = {

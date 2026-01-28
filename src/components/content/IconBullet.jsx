@@ -37,8 +37,8 @@ export const IconBullet = ({ mobileMode, darkMode, iconLight, iconDark, title, s
     gap: mobileMode ? "0.8rem" : "1rem",
   };
   const imageContainer = {
-    height: mobileMode ? "3rem" : "4.5rem",
-    width: mobileMode ? "3rem" : "4.5rem",
+    height: mobileMode ? "2.5rem" : "4.5rem",
+    width: mobileMode ? "2.5rem" : "4.5rem",
     borderRadius: "8px",
     backgroundColor: "var(--colour-3)",
   };

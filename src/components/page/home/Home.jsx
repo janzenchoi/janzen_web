@@ -20,7 +20,7 @@ export const Home = ({mobileMode, colourTheme}) => {
   return (
     <div>
       <AboutCard mobileMode={mobileMode} darkMode={darkMode}/>
-      <Card title="Contact">
+      <Card mobileMode={mobileMode} title="Contact">
         <div style={titleStyle}>{lorem}</div>
       </Card>
     </div>
