@@ -10,11 +10,16 @@ import { titleStyle, subtitleStyle, textStyle, horizontalDividerStyle } from "./
  * @param {string} title bullet title
  * @param {string} subtitle bullet subtitle
  * @param {string[]} description bullet subtext
+ * @param {string[]} downloadable downloadable file
+ * @param {string[]} downloadableName downloadable file name
  * @param {string} dateStart starting date
  * @param {string} dateEnd ending date
  * @returns icon bullet object
  */
-export const IconBullet = ({ mobileMode, darkMode, iconLight, iconDark, title, subtitle, description=[], dateStart="", dateEnd="" }) => {
+export const IconBullet = ({
+  mobileMode, darkMode, iconLight, iconDark, title, subtitle,
+  description=[], downloadable=null, downloadableName="file", dateStart="", dateEnd=""
+}) => {
   const [open, setOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
@@ -82,16 +87,29 @@ export const IconBullet = ({ mobileMode, darkMode, iconLight, iconDark, title, s
     const descriptionStyle = {
       ...textStyle,
       textAlign: mobileMode ? "start" : "justify",
+      display: "block"
+    };
+    const downloadStyle = {
+      fontWeight: 400,
+      fontSize: "1rem",
+      color: "var(--colour-5)",
+      textDecoration: "underline",
+      whiteSpace: "nowrap"
     };
     return (
-      <div>
-        {description.map((text, idx) => (
+      <div>{description.map((text, idx) => {
+        return (
           <div key={idx}>
             <div style={dividerStyle}/>
-            <div style={descriptionStyle}>{text}</div>
+            <div style={descriptionStyle}>{text}
+              {idx === description.length - 1 && downloadable !== null && (<>{" "}
+                <a href={downloadable} download={downloadableName}>
+                  <span style={downloadStyle}>({downloadableName})</span>
+                </a>{"."}</>)}
+            </div>
           </div>
-        ))}
-      </div>
+        );
+      })}</div>
     );
   };
 
