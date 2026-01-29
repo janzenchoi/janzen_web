@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ballImage from "../../assets/stuff/ball.png";
 
 // Constants
-const BALL_SIZE = 50;
+const BALL_SIZE = 100;
 const GRAVITY = 0.5;
 const FRICTION = 0.7;
 const AIR_FRICTION = 0.995;
