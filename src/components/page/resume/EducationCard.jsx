@@ -37,7 +37,7 @@ export const EducationCard = ({ mobileMode, darkMode }) => {
       title={"Bachelor of Mechatronic Engineering (Honours)"}
       subtitle={"University of New South Wales"}
       description={[
-        "Graduated with First Class Honours and the University Medal (92 HD)."
+        "Graduated with First Class Honours and the University Medal (92HD)."
       ]}
       iconLight={unswLight}
       iconDark={unswDark}
@@ -52,7 +52,7 @@ export const EducationCard = ({ mobileMode, darkMode }) => {
       title={"Bachelor of Computer Science"}
       subtitle={"University of New South Wales"}
       description={[
-        "Graduated with Distinction (92 HD)."
+        "Graduated with Distinction (92HD)."
       ]}
       iconLight={unswLight}
       iconDark={unswDark}
