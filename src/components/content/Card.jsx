@@ -54,8 +54,8 @@ export const horizontalDividerStyle = {
  * Vertical divider style
  */
 export const verticalDividerStyle = {
-  height: "calc(100% - 0.3rem)",
-  margin: "0.3rem 0.6rem 0 0",
+  height: "calc(100% - 0.4rem)",
+  margin: "0.4rem 0.6rem 0 0",
   borderLeft: "1px solid var(--colour-4)",
 }
 
