@@ -1,5 +1,6 @@
 import { Card } from "../../content/Card";
 import { Puppet } from "../../stuff/human/Puppet";
+import { Demo } from "../../stuff/human/Demo";
 
 /**
  * Activities page
@@ -12,6 +13,7 @@ export const Activities = ({ mobileMode, colourTheme }) => {
     <div>
       <Card mobileMode={mobileMode} title={"NOTHING"}/>
       <Puppet darkMode={colourTheme === "dark"}/>
+      <Demo/>
     </div>
   );
 }

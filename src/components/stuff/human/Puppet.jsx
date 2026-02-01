@@ -1,21 +1,17 @@
 import React, { useState } from "react";
-import { Human } from "./Human";
+import { HumanAnimator } from "./HumanAnimator";
 import { Draggable } from "./Draggable";
 
-/**
- * Puppet controller with fully functional sliders.
- * Panel header is the only drag handle; sliders slide smoothly and have reset buttons.
- * @param {boolean} darkMode whether to use dark or light mode
- * @returns puppet controller object
- */
 export const Puppet = ({ darkMode }) => {
   const DEFAULTS = {
     humanRotation: 0,
     headRotation: 0,
     foreUpperArmRotation: 180,
     foreLowerArmRotation: 0,
+    foreHandRotation: 0,
     hindUpperArmRotation: 180,
     hindLowerArmRotation: 0,
+    hindHandRotation: 0,
     hipRotation: 200,
     foreUpperLegRotation: -20,
     foreLowerLegRotation: 0,
@@ -30,8 +26,10 @@ export const Puppet = ({ darkMode }) => {
     headRotation: [-40, 30],
     foreUpperArmRotation: [0, 360],
     foreLowerArmRotation: [0, 150],
+    foreHandRotation: [-20, 20],
     hindUpperArmRotation: [0, 360],
     hindLowerArmRotation: [0, 150],
+    hindHandRotation: [-20, 20],
     hipRotation: [190, 220],
     foreUpperLegRotation: [-60, 70],
     foreLowerLegRotation: [-150, 0],
@@ -41,22 +39,37 @@ export const Puppet = ({ darkMode }) => {
     hindFootRotation: [30, 90],
   };
 
+  const OFFSET_RANGE = [-300, 300];
   const clamp = (v, min, max) => Math.min(max, Math.max(min, v));
-  const [joints, setJoints] = useState({ ...DEFAULTS });
 
+  const [joints, setJoints] = useState({ ...DEFAULTS });
+  const [offsetX, setOffsetX] = useState(0);
+  const [offsetY, setOffsetY] = useState(0);
+
+  // Single joint setter
   const setJoint = (key) => (e) => {
     const [min, max] = RANGES[key] ?? [0, 360];
     const value = clamp(Number(e.target.value), min, max);
     setJoints((s) => ({ ...s, [key]: value }));
   };
 
-  const resetJoint = (key) => () => setJoints((s) => ({ ...s, [key]: DEFAULTS[key] }));
+  // Reset single joint
+  const resetJoint = (key) => () =>
+    setJoints((s) => ({ ...s, [key]: DEFAULTS[key] }));
 
+  // Reset everything
+  const resetAll = () => {
+    setJoints({ ...DEFAULTS });
+    setOffsetX(0);
+    setOffsetY(0);
+  };
+
+  // Compact slider component
   const Slider = ({ label, joint }) => {
     const [min, max] = RANGES[joint] ?? [0, 360];
     return (
-      <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 12, marginBottom: 2 }}>
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 12, marginBottom: 1 }}>
           {label}: {joints[joint]}°
         </div>
         <div style={{ display: "flex", alignItems: "center" }}>
@@ -66,14 +79,47 @@ export const Puppet = ({ darkMode }) => {
             max={max}
             value={joints[joint]}
             onChange={setJoint(joint)}
-            style={{ flexGrow: 1, marginRight: 6 }}
+            style={{ flexGrow: 1, marginRight: 4, height: 12 }}
           />
           <button
             onClick={resetJoint(joint)}
             style={{
-              width: 40,
-              padding: "2px 4px",
-              fontSize: 10,
+              width: 36,
+              padding: "1px 3px",
+              fontSize: 9,
+              cursor: "pointer",
+            }}
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Offset slider component
+  const OffsetSlider = ({ label, value, setValue }) => {
+    const [min, max] = OFFSET_RANGE;
+    return (
+      <div style={{ marginBottom: 6 }}>
+        <div style={{ fontSize: 12, marginBottom: 1 }}>
+          {label}: {value}px
+        </div>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <input
+            type="range"
+            min={min}
+            max={max}
+            value={value}
+            onChange={(e) => setValue(Number(e.target.value))}
+            style={{ flexGrow: 1, marginRight: 4, height: 12 }}
+          />
+          <button
+            onClick={() => setValue(0)}
+            style={{
+              width: 36,
+              padding: "1px 3px",
+              fontSize: 9,
               cursor: "pointer",
             }}
           >
@@ -88,12 +134,24 @@ export const Puppet = ({ darkMode }) => {
     <>
       {/* Draggable Human */}
       <Draggable initialX={300} initialY={200}>
-        <Human {...joints} debug={true} human_scale={2} darkMode={darkMode} />
+        <div
+          style={{
+            transform: `translate(${offsetX}px, ${offsetY}px)`,
+            transition: "transform 0.3s ease", // <-- smooth offset transition
+          }}
+        >
+          <HumanAnimator
+            targetPose={joints}
+            duration={300}
+            debug={true}
+            humanScale={2}
+            darkMode={darkMode}
+          />
+        </div>
       </Draggable>
 
       {/* Draggable Slider Panel */}
       <Draggable initialX={520} initialY={200}>
-        {/* Only the header is the drag handle */}
         <div
           style={{
             width: 280,
@@ -104,30 +162,60 @@ export const Puppet = ({ darkMode }) => {
             padding: 12,
           }}
         >
-          {/* Drag handle */}
           <div
             style={{
               cursor: "grab",
               fontWeight: "bold",
-              marginBottom: 10,
+              marginBottom: 6,
               userSelect: "none",
             }}
           >
             Puppet Controls
           </div>
 
-          {/* Sliders are normal elements, not part of drag handle */}
+          {/* Reset All Button */}
+          <div style={{ textAlign: "center", marginBottom: 6 }}>
+            <button
+              onClick={resetAll}
+              style={{
+                padding: "4px 4px",
+                fontSize: 12,
+                cursor: "pointer",
+                borderRadius: 4,
+                background: "var(--colour-2)",
+                color: "var(--colour-6)",
+                fontWeight: "bold",
+                border: "none",
+              }}
+            >
+              Reset All
+            </button>
+          </div>
+
+          {/* Offset Controls */}
+          <OffsetSlider label="Offset X" value={offsetX} setValue={setOffsetX} />
+          <OffsetSlider label="Offset Y" value={offsetY} setValue={setOffsetY} />
+          <hr />
+
+          {/* Joint Controls */}
           <Slider label="Human" joint="humanRotation" />
           <hr />
           <Slider label="Head" joint="headRotation" />
           <hr />
+
           <Slider label="Fore Upper Arm" joint="foreUpperArmRotation" />
           <Slider label="Fore Lower Arm" joint="foreLowerArmRotation" />
+          <Slider label="Fore Hand" joint="foreHandRotation" />
+          <hr />
+
           <Slider label="Hind Upper Arm" joint="hindUpperArmRotation" />
           <Slider label="Hind Lower Arm" joint="hindLowerArmRotation" />
+          <Slider label="Hind Hand" joint="hindHandRotation" />
           <hr />
+
           <Slider label="Hip" joint="hipRotation" />
           <hr />
+
           <Slider label="Fore Upper Leg" joint="foreUpperLegRotation" />
           <Slider label="Fore Lower Leg" joint="foreLowerLegRotation" />
           <Slider label="Fore Foot" joint="foreFootRotation" />
