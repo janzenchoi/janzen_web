@@ -1,52 +1,40 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 
-export const Draggable = ({ children, initialX = 0, initialY = 0 }) => {
+export const Draggable = ({ children, initialX = 0, initialY = 0, handleSelector }) => {
   const [position, setPosition] = useState({ x: initialX, y: initialY });
   const [dragging, setDragging] = useState(false);
-
   const offset = useRef({ x: 0, y: 0 });
 
-  // Helper to get coordinates from mouse or touch
-  const getEventPosition = (e) => {
-    if (e.touches) {
-      return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    } else {
-      return { x: e.clientX, y: e.clientY };
-    }
-  };
+  const handleMouseDown = (e) => {
+    // Only start drag if clicked on handle (or no handle specified)
+    if (handleSelector && !e.target.closest(handleSelector)) return;
+    // Ignore interactive elements inside draggable
+    if (["INPUT", "BUTTON", "TEXTAREA", "SELECT"].includes(e.target.tagName)) return;
 
-  const handleDragStart = (e) => {
-    const { x, y } = getEventPosition(e);
     setDragging(true);
-    offset.current = { x: x - position.x, y: y - position.y };
+    offset.current = {
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    };
     e.preventDefault();
   };
 
-  const handleDragMove = (e) => {
+  const handleMouseMove = (e) => {
     if (!dragging) return;
-    const { x, y } = getEventPosition(e);
     setPosition({
-      x: x - offset.current.x,
-      y: y - offset.current.y,
+      x: e.clientX - offset.current.x,
+      y: e.clientY - offset.current.y,
     });
   };
 
-  const handleDragEnd = () => {
-    setDragging(false);
-  };
+  const handleMouseUp = () => setDragging(false);
 
   useEffect(() => {
-    // Listen for both mouse and touch events
-    document.addEventListener("mousemove", handleDragMove);
-    document.addEventListener("mouseup", handleDragEnd);
-    document.addEventListener("touchmove", handleDragMove, { passive: false });
-    document.addEventListener("touchend", handleDragEnd);
-
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     return () => {
-      document.removeEventListener("mousemove", handleDragMove);
-      document.removeEventListener("mouseup", handleDragEnd);
-      document.removeEventListener("touchmove", handleDragMove);
-      document.removeEventListener("touchend", handleDragEnd);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [dragging]);
 
@@ -58,10 +46,8 @@ export const Draggable = ({ children, initialX = 0, initialY = 0 }) => {
         top: position.y,
         cursor: dragging ? "grabbing" : "grab",
         userSelect: "none",
-        touchAction: "none", // prevents touch scrolling
       }}
-      onMouseDown={handleDragStart}
-      onTouchStart={handleDragStart}
+      onMouseDown={handleMouseDown}
     >
       {children}
     </div>

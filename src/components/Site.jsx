@@ -9,7 +9,6 @@ import { Body } from "./Body";
 import { Ball } from "./stuff/Ball";
 import fg_dark from "../assets/janzen/fg_dark.png";
 import fg_light from "../assets/janzen/fg_light.png";
-import { Human } from "./stuff/human/Human";
 
 /**
  * Site
@@ -73,7 +72,6 @@ export const Site = () => {
       </div>
       <Footer/>
       {ballExists && <Ball/>}
-      <Human/>
     </HashRouter>
   </div>
 }
