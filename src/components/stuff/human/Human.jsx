@@ -19,6 +19,7 @@ import torsoImage from "../../../assets/stuff/human/torso.png";
  * A hierarchical human puppet composed of stick-based body parts.
  * All joints are rotated relative to their parent joint.
  *
+ * @param {number} humanRotation rotation of the entire human (degrees)
  * @param {number} headRotation rotation of the head (degrees)
  * @param {number} foreUpperArmRotation rotation of the front upper arm / shoulder (degrees)
  * @param {number} foreLowerArmRotation rotation of the front lower arm / elbow (degrees)
@@ -36,11 +37,12 @@ import torsoImage from "../../../assets/stuff/human/torso.png";
  * @returns human object
  */
 export const Human = ({
+  humanRotation = 0,          // [0, 360]
   headRotation = 0,           // [-40, 30]
-  foreUpperArmRotation = 180,
-  foreLowerArmRotation = 0,
-  hindUpperArmRotation = 180,
-  hindLowerArmRotation = 0,
+  foreUpperArmRotation = 180, // [0, 360]
+  foreLowerArmRotation = 0,   // [0, 150]
+  hindUpperArmRotation = 180, // [0, 360]
+  hindLowerArmRotation = 0,   // [0, 150]
   hipRotation = 200,          // [190, 220]
   foreUpperLegRotation = -20, // [-60, 70]
   foreLowerLegRotation = 0,   // [0, -150]
@@ -218,7 +220,7 @@ export const Human = ({
   return (
     <Stick
       length={10*human_scale}
-      rotation={-90}
+      rotation={-90+humanRotation}
       childAxes={[82*human_scale, 90*human_scale, 0*human_scale, 0*human_scale, 82*human_scale]}
       debug={debug}
     >

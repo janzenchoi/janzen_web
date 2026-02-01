@@ -8,6 +8,7 @@ import { Draggable } from "./Draggable";
  */
 export const Puppet = () => {
   const DEFAULTS = {
+    humanRotation: 0,
     headRotation: 0,
     foreUpperArmRotation: 180,
     foreLowerArmRotation: 0,
@@ -23,11 +24,12 @@ export const Puppet = () => {
   };
 
   const RANGES = {
+    humanRotation: [0, 360],
     headRotation: [-40, 30],
     foreUpperArmRotation: [0, 360],
-    foreLowerArmRotation: [0, 360],
+    foreLowerArmRotation: [0, 150],
     hindUpperArmRotation: [0, 360],
-    hindLowerArmRotation: [0, 360],
+    hindLowerArmRotation: [0, 150],
     hipRotation: [190, 220],
     foreUpperLegRotation: [-60, 70],
     foreLowerLegRotation: [-150, 0],
@@ -113,6 +115,8 @@ export const Puppet = () => {
           </div>
 
           {/* Sliders are normal elements, not part of drag handle */}
+          <Slider label="Human" joint="humanRotation" />
+          <hr />
           <Slider label="Head" joint="headRotation" />
           <hr />
           <Slider label="Fore Upper Arm" joint="foreUpperArmRotation" />
