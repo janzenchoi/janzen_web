@@ -19,9 +19,17 @@ import {
   runStride5,
   runStride6,
 
-  // jump poses
+  // stand jump poses
   standJumpPrime,
   standJumpFly,
+  standJumpLand,
+
+  // run jump poses
+  jumpPrime,
+  jumpFly,
+  jumpPeak,
+  jumpFall,
+  jumpLand,
 } from "./poses";
 
 export const Character = () => {
@@ -30,83 +38,85 @@ export const Character = () => {
   const [duration, setDuration] = useState(140);
   const [facing, setFacing] = useState("left");
 
-  /* ---------------- Animation refs ---------------- */
+  /* ---------------- DOM refs ---------------- */
   const wrapperRef = useRef(null);
 
-  const poseRef = useRef(standCasual);
+  /* ---------------- Kinematics refs ---------------- */
+  const xRef = useRef(0);      // px
+  const yRef = useRef(0);      // px (0 = ground, negative = up)
+  const vyRef = useRef(0);     // px/ms (negative = up)
 
-  const xRef = useRef(0);     // px
-  const yRef = useRef(0);     // px (0 = ground, negative = up)
-  const vyRef = useRef(0);    // px/ms (negative = up)
-
+  /* ---------------- Loop refs ---------------- */
   const lastTsRef = useRef(0);
   const rafRef = useRef(null);
   const animatingRef = useRef(false);
 
+  /* ---------------- Input refs ---------------- */
   const directionRef = useRef(null); // "left" | "right" | null
   const runningRef = useRef(false);
 
+  /* ---------------- Stride refs ---------------- */
   const strideIndexRef = useRef(0);
   const strideTimerRef = useRef(0);
 
   /* ---------------- Strides ---------------- */
-  const walkStrides = [
-    walkStride1,
-    walkStride2,
-    walkStride3,
-    walkStride4,
-    walkStride5,
-    walkStride6,
-  ];
-
-  const runStrides = [
-    runStride1,
-    runStride2,
-    runStride3,
-    runStride4,
-    runStride5,
-    runStride6,
-  ];
+  const walkStrides = [walkStride1, walkStride2, walkStride3, walkStride4, walkStride5, walkStride6];
+  const runStrides = [runStride1, runStride2, runStride3, runStride4, runStride5, runStride6];
 
   /* ---------------- Movement tuning ---------------- */
   const WALK_FRAME = 150;
   const RUN_FRAME = 100;
-  const WALK_VELOCITY = 0.20; // px/ms
-  const RUN_VELOCITY = 0.40;  // px/ms
+
+  const WALK_VELOCITY = 0.20; // px/ms (ground)
+  const RUN_VELOCITY = 0.40;  // px/ms (ground)
+
+  // In-air: reduce horizontal control by 50%
+  const AIR_CONTROL_MULT = 0.50;
+
+  // Extra in-air boost so walk/run jumps travel farther than ground running/walking
+  const WALK_JUMP_BOOST = 0.12; // px/ms (air only)
+  const RUN_JUMP_BOOST = 0.22;  // px/ms (air only)
+
+  // Stand jump: allow slight horizontal control (requested)
+  const STAND_AIR_CONTROL_MULT = 0.50; // 50% of walk ground speed while in-air
+  const STAND_AIR_CONTROL_CAP = 0.10;  // px/ms hard cap, prevents "too much" on fast configs
 
   const VIEW_W = 10;
   const VIEW_H = 10;
 
   /* ---------------- Jump physics tuning ---------------- */
-  const GRAVITY = 0.002;        // px/ms^2
-  const JUMP_VY_TAP = -0.45;    // px/ms
-  const JUMP_VY_HOLD = -0.68;   // px/ms
+  const GRAVITY = 0.002;       // px/ms^2
+  const JUMP_VY_TAP = -0.60;   // px/ms
+  const JUMP_VY_HOLD = -0.80;  // px/ms
   const RUN_JUMP_VY_MULT = 1.05;
 
-  const TAP_THRESHOLD = 160;    // ms < this = tap
-  const PRIME_MS = 110;         // how long to *hold* standJumpPrime before takeoff + after landing
-  const PRIME_CROUCH_PX = 8;    // visual crouch only during prime
+  const TAP_THRESHOLD = 160;   // ms < this = tap
+  const PRIME_MS = 100;
+  const PRIME_CROUCH_PX = 8;
 
-  /* ---------------- Jump refs ---------------- */
-  // jumpState: "none" | "prime" | "air" | "land"
+  const PRELAND_LEAD_MS = 90;
+
+  /* ---------------- Jump state ---------------- */
+  // jumpState: "none" | "prime" | "air" | "preland" | "land"
   const jumpStateRef = useRef("none");
   const jumpTimerRef = useRef(0);
 
   const wHeldRef = useRef(false);
   const jumpHoldStartRef = useRef(0);
 
+  // jumpMode: "stand" | "walk" | "run"
+  const jumpModeRef = useRef("stand");
+  const jumpStartDirRef = useRef(null); // lock mode based on dir at jump start
+
   /* ---------------- Helpers ---------------- */
   const setPoseNow = (nextPose, nextDuration) => {
-    poseRef.current = nextPose;
     setPose(nextPose);
     setDuration(nextDuration);
   };
 
   const applyTransform = (x, y, primeCrouch) => {
     if (!wrapperRef.current) return;
-
     const displayY = y + (primeCrouch ? PRIME_CROUCH_PX : 0);
-
     wrapperRef.current.style.transform =
       `translate3d(-50%, -50%, 0) translate(${x}px, ${displayY}px)`;
   };
@@ -131,8 +141,19 @@ export const Character = () => {
       strideIndexRef.current = 0;
       strideTimerRef.current = 0;
       setDuration(120);
-      if (jumpStateRef.current === "none") setPoseNow(standCasual, 120);
+      setPoseNow(standCasual, 120);
     }
+  };
+
+  // Solve: y + vy*t + 0.5*g*t^2 = 0 for t>0
+  const timeToGroundMs = (y, vy, g) => {
+    if (y >= 0) return 0;
+    if (g <= 0) return null;
+    const disc = vy * vy - 2 * g * y;
+    if (disc < 0) return null;
+    const t = (-vy + Math.sqrt(disc)) / g;
+    if (!Number.isFinite(t) || t < 0) return null;
+    return t;
   };
 
   /* ---------------- Movement control ---------------- */
@@ -151,42 +172,91 @@ export const Character = () => {
     ensureLoop();
   };
 
+  /* ---------------- Jump pose selection ---------------- */
+  const setJumpPoseForState = (state, dtForTiming = 0) => {
+    const mode = jumpModeRef.current;
+
+    // Stand jump: keep your stand jump poses
+    if (mode === "stand") {
+      if (state === "prime") setPoseNow(standJumpPrime, PRIME_MS);
+      else if (state === "air") setPoseNow(standJumpFly, 220);
+      else if (state === "preland" || state === "land") setPoseNow(standJumpLand, PRIME_MS);
+      return;
+    }
+
+    // Walk jump animations: jumpFly -> standJumpFly -> standJumpLand
+    if (mode === "walk") {
+      if (state === "prime") {
+        setPoseNow(jumpFly, 140);
+        return;
+      }
+      if (state === "air") {
+        jumpTimerRef.current += dtForTiming;
+        if (jumpTimerRef.current <= 120) setPoseNow(jumpFly, 120);
+        else setPoseNow(standJumpFly, 200);
+        return;
+      }
+      if (state === "preland" || state === "land") {
+        setPoseNow(standJumpLand, PRIME_MS);
+        return;
+      }
+    }
+
+    // Run jump animations: jumpPrime, jumpFly, jumpPeak, jumpFall, jumpLand
+    if (mode === "run") {
+      if (state === "prime") {
+        setPoseNow(jumpPrime, PRIME_MS);
+        return;
+      }
+      if (state === "air") {
+        const vy = vyRef.current;
+        if (vy < -0.20) setPoseNow(jumpFly, 140);
+        else if (vy < 0.10) setPoseNow(jumpPeak, 140);
+        else setPoseNow(jumpFall, 140);
+        return;
+      }
+      if (state === "preland" || state === "land") {
+        setPoseNow(jumpLand, PRIME_MS);
+        return;
+      }
+    }
+  };
+
   /* ---------------- Jump control ---------------- */
   const startJump = () => {
     if (jumpStateRef.current !== "none") return;
 
-    // Enter PRIME state immediately and HOLD it for PRIME_MS so it visibly appears.
+    // Lock jump mode based on state at jump start
+    const dirAtStart = directionRef.current;
+    const isRunning = runningRef.current && !!dirAtStart;
+
+    jumpStartDirRef.current = dirAtStart;
+    jumpModeRef.current = dirAtStart ? (isRunning ? "run" : "walk") : "stand";
+
     jumpStateRef.current = "prime";
     jumpTimerRef.current = 0;
 
     wHeldRef.current = true;
     jumpHoldStartRef.current = Date.now();
 
-    // Pre-set initial vy to HOLD; can be downgraded on keyup to TAP
-    const running = runningRef.current;
-    vyRef.current = JUMP_VY_HOLD * (running ? RUN_JUMP_VY_MULT : 1);
-
-    // Grounded at prime
+    const vy0 = JUMP_VY_HOLD * (isRunning ? RUN_JUMP_VY_MULT : 1);
+    vyRef.current = vy0;
     yRef.current = 0;
 
-    setPoseNow(standJumpPrime, PRIME_MS);
+    setJumpPoseForState("prime");
     ensureLoop();
   };
 
   const endJumpHold = () => {
     wHeldRef.current = false;
 
-    // If we haven't left prime yet, we can still decide tap vs hold cleanly.
-    // (We intentionally "take off" only after PRIME_MS.)
     if (jumpStateRef.current === "prime") {
       const holdMs = Date.now() - jumpHoldStartRef.current;
       if (holdMs < TAP_THRESHOLD) {
-        vyRef.current = JUMP_VY_TAP * (runningRef.current ? RUN_JUMP_VY_MULT : 1);
+        const isRunning = jumpModeRef.current === "run";
+        vyRef.current = JUMP_VY_TAP * (isRunning ? RUN_JUMP_VY_MULT : 1);
       }
-      return;
     }
-
-    // If already airborne, do nothing (keeps arc stable, no teleporting).
   };
 
   /* ---------------- rAF loop ---------------- */
@@ -199,31 +269,61 @@ export const Character = () => {
     const dir = directionRef.current;
     const running = runningRef.current;
 
-    /* Horizontal movement (allowed during jump as well) */
+    const jumpState = jumpStateRef.current;
+    const inAir = jumpState === "air" || jumpState === "preland";
+    const primeOrLand = jumpState === "prime" || jumpState === "land";
+
+    /* ---------------- Horizontal movement ---------------- */
     if (dir) {
-      const velocity = running ? RUN_VELOCITY : WALK_VELOCITY;
-      xRef.current += (dir === "right" ? 1 : -1) * velocity * dt;
+      const baseGroundVel = running ? RUN_VELOCITY : WALK_VELOCITY;
+
+      if (inAir) {
+        const mode = jumpModeRef.current;
+
+        if (mode === "stand") {
+          // NEW: slight horizontal control during stand jump
+          // Uses a small fraction of walk speed, capped to stay subtle.
+          const standAirVel = Math.min(
+            WALK_VELOCITY * STAND_AIR_CONTROL_MULT,
+            STAND_AIR_CONTROL_CAP
+          );
+          xRef.current += (dir === "right" ? 1 : -1) * standAirVel * dt;
+        } else {
+          const airControlVel = baseGroundVel * AIR_CONTROL_MULT;
+          const boost = mode === "run" ? RUN_JUMP_BOOST : WALK_JUMP_BOOST;
+          const totalAirVel = airControlVel + boost;
+
+          xRef.current += (dir === "right" ? 1 : -1) * totalAirVel * dt;
+        }
+      } else if (jumpState === "none" || primeOrLand) {
+        xRef.current += (dir === "right" ? 1 : -1) * baseGroundVel * dt;
+      }
     }
 
-    /* Jump state machine */
-    const jumpState = jumpStateRef.current;
-
+    /* ---------------- Jump state machine ---------------- */
     if (jumpState === "prime") {
-      // Hold prime pose on ground for PRIME_MS, then take off.
       jumpTimerRef.current += dt;
-
       if (jumpTimerRef.current >= PRIME_MS) {
         jumpStateRef.current = "air";
         jumpTimerRef.current = 0;
-
-        // Switch to fly pose immediately when leaving ground
-        setPoseNow(standJumpFly, 220);
+        setJumpPoseForState("air", 0);
       }
-    } else if (jumpState === "air") {
+    } else if (jumpState === "air" || jumpState === "preland") {
       vyRef.current += GRAVITY * dt;
       yRef.current += vyRef.current * dt;
 
-      // Landing detection
+      if (jumpStateRef.current === "air") {
+        setJumpPoseForState("air", dt);
+      }
+
+      if (jumpStateRef.current === "air" && vyRef.current > 0 && yRef.current < 0) {
+        const tImpact = timeToGroundMs(yRef.current, vyRef.current, GRAVITY);
+        if (tImpact !== null && tImpact <= PRELAND_LEAD_MS) {
+          jumpStateRef.current = "preland";
+          setJumpPoseForState("preland");
+        }
+      }
+
       if (vyRef.current > 0 && yRef.current >= 0) {
         yRef.current = 0;
         vyRef.current = 0;
@@ -231,15 +331,15 @@ export const Character = () => {
         jumpStateRef.current = "land";
         jumpTimerRef.current = 0;
 
-        // Show prime after landing for PRIME_MS (visibly)
-        setPoseNow(standJumpPrime, PRIME_MS);
+        setJumpPoseForState("land");
       }
     } else if (jumpState === "land") {
       jumpTimerRef.current += dt;
-
       if (jumpTimerRef.current >= PRIME_MS) {
         jumpStateRef.current = "none";
         jumpTimerRef.current = 0;
+        jumpModeRef.current = "stand";
+        jumpStartDirRef.current = null;
 
         if (directionRef.current) {
           beginMovement();
@@ -248,7 +348,7 @@ export const Character = () => {
         }
       }
     } else {
-      /* Stride animation (only when not jumping) */
+      /* ---------------- Stride animation (only when not jumping) ---------------- */
       if (dir) {
         strideTimerRef.current += dt;
 
@@ -262,19 +362,18 @@ export const Character = () => {
           setPoseNow(strides[i], frame);
         }
       } else {
-        // idle
         strideTimerRef.current = 0;
         strideIndexRef.current = 0;
       }
     }
 
-    // Apply transform: prime crouch only in prime/land states (grounded)
     const primeCrouch =
-      jumpStateRef.current === "prime" || jumpStateRef.current === "land";
+      jumpStateRef.current === "prime" ||
+      jumpStateRef.current === "preland" ||
+      jumpStateRef.current === "land";
 
     applyTransform(xRef.current, yRef.current, primeCrouch);
 
-    // Keep looping while we have movement or any jump state active
     if (animatingRef.current && (directionRef.current || jumpStateRef.current !== "none")) {
       rafRef.current = requestAnimationFrame(loop);
     } else {
@@ -303,7 +402,6 @@ export const Character = () => {
         beginMovement();
       }
 
-      // Jump immediately on keydown W
       if (e.key === "w" || e.key === "W") {
         startJump();
       }

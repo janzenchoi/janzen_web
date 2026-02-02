@@ -42,7 +42,7 @@ export const standCasual = {
 
   offsetX: 0,
   offsetY: 0,
-  borderX0: -45,
+  borderX0: -55,
   borderX1: 20,
   borderY0: -120,
   borderY1: 180,
@@ -397,7 +397,7 @@ export const jumpFly = {
 };
 
 export const jumpPeak = {
-  humanRotation: 0,
+  humanRotation: -10,
   headRotation: 5,
   foreUpperArmRotation: 195,
   foreLowerArmRotation: 60,
@@ -421,7 +421,7 @@ export const jumpPeak = {
 };
 
 export const jumpFall = {
-  humanRotation: 10,
+  humanRotation: -10,
   headRotation: 5,
   foreUpperArmRotation: 262,
   foreLowerArmRotation: 60,
@@ -445,7 +445,7 @@ export const jumpFall = {
 };
 
 export const jumpLand = {
-  humanRotation: 5,
+  humanRotation: -10,
   headRotation: 5,
   foreUpperArmRotation: 173,
   foreLowerArmRotation: 80,
@@ -479,13 +479,13 @@ export const standJumpPrime = {
   hindHandRotation: 0,
   hipRotation: 220,
   foreUpperLegRotation: 58,
-  foreLowerLegRotation: -103,
-  foreFootRotation: 83,
+  foreLowerLegRotation: -120,
+  foreFootRotation: 120,
   hindUpperLegRotation: 25,
   hindLowerLegRotation: -125,
-  hindFootRotation: 90,
+  hindFootRotation: 150,
   offsetX: 0,
-  offsetY: 20,
+  offsetY: 0,
   borderX0: -85,
   borderX1: 45,
   borderY0: -140,
@@ -509,7 +509,31 @@ export const standJumpFly = {
   hindLowerLegRotation: -40,
   hindFootRotation: 45,
   offsetX: 0,
-  offsetY: -20,
+  offsetY: 0,
+  borderX0: -85,
+  borderX1: 45,
+  borderY0: -140,
+  borderY1: 180
+};
+
+export const standJumpLand = {
+  humanRotation: 350,
+  headRotation: 4,
+  foreUpperArmRotation: 155,
+  foreLowerArmRotation: 80,
+  foreHandRotation: 0,
+  hindUpperArmRotation: 180,
+  hindLowerArmRotation: 60,
+  hindHandRotation: 0,
+  hipRotation: 220,
+  foreUpperLegRotation: 10,
+  foreLowerLegRotation: -60,
+  foreFootRotation: 80,
+  hindUpperLegRotation: -15,
+  hindLowerLegRotation: -60,
+  hindFootRotation: 100,
+  offsetX: 0,
+  offsetY: 0,
   borderX0: -85,
   borderX1: 45,
   borderY0: -140,

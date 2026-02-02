@@ -5,7 +5,7 @@ import { standStraight, standCasual } from "./poses";
 import { walkStride1, walkStride2, walkStride3, walkStride4, walkStride5, walkStride6 } from "./poses";
 import { runStride1, runStride2, runStride3, runStride4, runStride5, runStride6 } from "./poses";
 import { jumpPrime, jumpFly, jumpPeak, jumpFall, jumpLand } from "./poses";
-import { standJumpPrime, standJumpFly } from "./poses";
+import { standJumpPrime, standJumpFly, standJumpLand } from "./poses";
 
 /**
  * Controls the human to do poses
@@ -60,7 +60,6 @@ export const Controller = () => {
       await animate(jumpFly, 300);
       await animate(standJumpFly, 300);
       await animate(jumpLand, 300);
-      await animate(standCasual, 300);
     }
   };
 
@@ -72,19 +71,18 @@ export const Controller = () => {
       await animate(jumpPeak, 300);
       await animate(jumpFall, 300);
       await animate(jumpLand, 300);
-      await animate(standCasual, 300);
     }
   };
 
   // Standing Jumping animation
   const animateStandJump = async (count=1) => {
     for (let i = 0; i < count; i++) {
-      await animate(standCasual, 300);
+      // await animate(standCasual, 300);
       await animate(standJumpPrime, 300);
       await animate(standJumpFly, 300);
       await animate(standJumpFly, 900);
-      await animate(standJumpPrime, 300);
-      await animate(standCasual, 300);
+      await animate(standJumpLand, 300);
+      // await animate(standCasual, 300);
     }
   };
 
