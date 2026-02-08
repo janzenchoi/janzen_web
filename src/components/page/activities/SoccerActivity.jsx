@@ -15,10 +15,10 @@ export const SoccerActivity = ({ mobileMode, darkMode, activityController }) => 
   const title = "Soccer Ball";
   const subtitle = "Throw a soccer ball around while looking at Janzen's qualifications.";
   const mobileDescription = [
-    "Swipe and release the soccer ball to throw it."
+    "Swipe and release the soccer ball to throw it"
   ];
   const desktopDescription = [
-    "Drag and release the soccer ball to throw it."
+    "Drag and release the soccer ball to throw it"
   ];
 
   // Render

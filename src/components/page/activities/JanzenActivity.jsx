@@ -15,14 +15,18 @@ export const JanzenActivity = ({ mobileMode, darkMode, activityController }) => 
   const title = "Tiny Janzen";
   const subtitle = "Get experience controlling Janzen before you hire him.";
   const mobileDescription = [
-    "Controls currently only available for desktop mode.",
+    "Hold and release to forcibly relocate",
+    "Move joystick left / right to walk left / right",
+    "Move joystick upward to jump",
+    "Move joystick downward to crouch",
+    "Move joystick outside the dashed ring to sprint",
   ];
   const desktopDescription = [
-    "Drag and release to forcibly relocate.",
-    "Press A / D to walk left / right.",
-    "Press W / S to jump / crouch.",
-    "Press SHIFT to sprint.",
-    "Press 1-9 to emote."
+    "Drag and release to forcibly relocate",
+    "Press A / D to walk left / right",
+    "Press W / S to jump / crouch",
+    "Press SHIFT to sprint",
+    // "Press 1-9 to emote."
   ];
 
   // Render
