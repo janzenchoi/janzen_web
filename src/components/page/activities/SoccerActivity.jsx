@@ -1,5 +1,6 @@
 import { ActivityCard } from "../../content/ActivityCard";
-import soccerImage from "../../../assets/stuff/ball_icon.png";
+import ballLight from "../../../assets/stuff/ball_light_icon.png";
+import ballDark from "../../../assets/stuff/ball_dark_icon.png";
 
 /**
  * Soccer activity card
@@ -31,8 +32,8 @@ export const SoccerActivity = ({ mobileMode, darkMode, activityController }) => 
       title={title}
       subtitle={subtitle}
       description={mobileMode ? mobileDescription : desktopDescription}
-      iconLight={soccerImage}
-      iconDark={soccerImage}
+      iconLight={ballLight}
+      iconDark={ballDark}
     />
   );
 }

@@ -3,6 +3,7 @@ import { SoccerActivity } from "./SoccerActivity";
 import { JanzenActivity } from "./JanzenActivity";
 import { Puppet } from "../../stuff/human/Puppet";
 import { Controller } from "../../stuff/human/Controller";
+import { Joystick } from "../../stuff/human/Joystick";
 
 /**
  * Activities page
@@ -33,8 +34,9 @@ export const Activities = ({ mobileMode, colourTheme, activityController }) => {
     <div>
       <Card1/>
       <Card2/>
-      {/* <Puppet darkMode={colourTheme === "dark"}/>
-      <Controller darkMode={colourTheme === "dark"}/> */}
+      {/* <Puppet darkMode={colourTheme === "dark"}/> */}
+      {/* <Puppet darkMode={colourTheme === "dark"}/> */}
+      {/* <Joystick/> */}
     </div>
   );
 }

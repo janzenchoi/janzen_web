@@ -1,5 +1,7 @@
+// Character.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { HumanAnimator } from "./HumanAnimator";
+import { Joystick } from "./Joystick";
 
 import {
   standCasual,
@@ -41,6 +43,25 @@ import {
   crouchWalk2
 } from "./poses";
 
+/**
+ * Character:
+ * - Root overlay does NOT block the site (pointerEvents:none)
+ * - Character itself is draggable (pointerEvents:auto)
+ * - Joystick is mounted inside Character (Scene unchanged)
+ * - Safe to toggle janzenExists on/off/on (hard reset + hard cleanup)
+ * - Auto-jump-repeat: hold W or hold joystick up -> continuous jumping (bunnyhop)
+ *
+ * Keyboard:
+ * - A/D = move, Shift = sprint, W = jump (hold), S = crouch (queues in air)
+ *
+ * Joystick mapping (8-dir):
+ * - Left/Right            => walk
+ * - Very left/right       => sprint
+ * - Top                   => jump only (repeat while held)
+ * - Top-left/right        => jump + move (sprint if "very")
+ * - Bottom                => crouch only
+ * - Bottom-left/right     => crouch-walk
+ */
 export const Character = ({ mobileMode, darkMode }) => {
   /* =========================================================================
      MANUAL GROUND CONFIG (EDIT HERE)
@@ -95,11 +116,20 @@ export const Character = ({ mobileMode, darkMode }) => {
   const JUMP_VY_TAP = BASE_JUMP_VY_TAP * HUMAN_SCALE;
   const JUMP_VY_HOLD = BASE_JUMP_VY_HOLD * HUMAN_SCALE;
 
+  /* =========================================================================
+     JOYSTICK THRESHOLDS (EDIT HERE)
+  ========================================================================= */
+  const JOY_ACTIVE_MAG = 0.18; // below => ignore joystick
+  const JOY_SPRINT_MAG = 0.86; // "very" threshold
+
   /* ---------------- Minimal React state ---------------- */
   const [pose, setPose] = useState(standCasual);
   const [duration, setDuration] = useState(140);
   const [facing, setFacing] = useState("left");
   const [isDraggingUi, setIsDraggingUi] = useState(false);
+
+  /* ---------------- Joystick position state ---------------- */
+  const [joyPos, setJoyPos] = useState({ x: 24, y: 24 });
 
   /* ---------------- DOM refs ---------------- */
   const wrapperRef = useRef(null);
@@ -111,7 +141,6 @@ export const Character = ({ mobileMode, darkMode }) => {
 
   /* ---------------- Ground caching ---------------- */
   const groundYRef = useRef(0);
-
   const recomputeGroundY = () => {
     groundYRef.current = window.innerHeight - groundPxFromBottom;
   };
@@ -121,13 +150,23 @@ export const Character = ({ mobileMode, darkMode }) => {
   const rafRef = useRef(null);
   const animatingRef = useRef(false);
 
-  /* ---------------- Input refs ---------------- */
-  const directionRef = useRef(null);
-  const runningRef = useRef(false);
+  /* ---------------- Keyboard raw refs ---------------- */
+  const kbDirRef = useRef(null); // "left" | "right" | null
+  const kbShiftRef = useRef(false);
+  const kbCrouchRef = useRef(false);
+  const kbJumpRef = useRef(false);
+
+  /* ---------------- Joystick raw refs ---------------- */
+  const joyDir8Ref = useRef("center"); // "e","w","n","s","ne","nw","se","sw","center"
+  const joyMagRef = useRef(0);
+
+  /* ---------------- Effective input (used by sim) ---------------- */
+  const directionRef = useRef(null); // "left" | "right" | null
   const shiftHeldRef = useRef(false);
+  const runningRef = useRef(false);
 
   const sHeldRef = useRef(false);
-  const crouchQueuedRef = useRef(false); // NEW: queue crouch while airborne
+  const crouchQueuedRef = useRef(false);
   const crouchingRef = useRef(false);
   const crouchMovingRef = useRef(false);
   const crouchPhaseRef = useRef(0);
@@ -149,13 +188,15 @@ export const Character = ({ mobileMode, darkMode }) => {
   const strideTimerRef = useRef(0);
 
   /* ---------------- Jump state ---------------- */
-  const jumpStateRef = useRef("none");
+  const jumpStateRef = useRef("none"); // "none" | "prime" | "air" | "land"
   const jumpTimerRef = useRef(0);
 
-  const wHeldRef = useRef(false);
+  const wHeldRef = useRef(false); // actual "in-jump hold" flag used for gravity cut
   const jumpHoldStartRef = useRef(0);
+  const jumpModeRef = useRef("stand"); // "stand" | "walk" | "run"
 
-  const jumpModeRef = useRef("stand");
+  // NEW: desired jump-hold intent (keyboard W held OR joystick held up)
+  const wantJumpHoldRef = useRef(false);
 
   /* ---------------- Strides ---------------- */
   const walkStrides = useMemo(
@@ -168,7 +209,7 @@ export const Character = ({ mobileMode, darkMode }) => {
   );
 
   /* =========================================================================
-     TRANSFORM: MANUAL GROUND (uses cached groundYRef)
+     TRANSFORM
   ========================================================================= */
   const applyTransformFromAir = (x, yAir) => {
     if (!wrapperRef.current) return;
@@ -186,7 +227,7 @@ export const Character = ({ mobileMode, darkMode }) => {
   };
 
   /* =========================================================================
-     CLAMPS (simple)
+     CLAMPS
   ========================================================================= */
   const SCREEN_PAD_X = 40 * HUMAN_SCALE;
 
@@ -224,17 +265,74 @@ export const Character = ({ mobileMode, darkMode }) => {
     setDuration(nextDuration);
   };
 
-  const cancelJumpNow = () => {
-    jumpStateRef.current = "none";
-    jumpTimerRef.current = 0;
-    jumpModeRef.current = "stand";
-    wHeldRef.current = false;
-    vyRef.current = 0;
-    yAirRef.current = 0;
-  };
-
   const isAirOrJumping = () => jumpStateRef.current !== "none" || yAirRef.current < 0;
 
+  /* =========================================================================
+     HARD RESET / CLEANUP (fixes janzenExists toggle glitch)
+  ========================================================================= */
+  const hardReset = () => {
+    // loop
+    animatingRef.current = false;
+    lastTsRef.current = 0;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = null;
+
+    // motion
+    xRef.current = 0;
+    yAirRef.current = 0;
+    vyRef.current = 0;
+
+    // inputs
+    directionRef.current = null;
+    shiftHeldRef.current = false;
+    runningRef.current = false;
+
+    kbDirRef.current = null;
+    kbShiftRef.current = false;
+    kbCrouchRef.current = false;
+    kbJumpRef.current = false;
+
+    joyDir8Ref.current = "center";
+    joyMagRef.current = 0;
+
+    // crouch
+    sHeldRef.current = false;
+    crouchQueuedRef.current = false;
+    crouchingRef.current = false;
+    crouchMovingRef.current = false;
+    crouchPhaseRef.current = 0;
+    crouchTimerRef.current = 0;
+
+    // jump
+    jumpStateRef.current = "none";
+    jumpTimerRef.current = 0;
+    wHeldRef.current = false;
+    wantJumpHoldRef.current = false;
+    jumpHoldStartRef.current = 0;
+    jumpModeRef.current = "stand";
+
+    // drag
+    draggingRef.current = false;
+    dragPtrIdRef.current = null;
+    dragOffsetRef.current = { dx: 0, dy: 0 };
+    dragAbsRef.current = { x: 0, y: 0 };
+
+    // anim timers
+    strideIndexRef.current = 0;
+    strideTimerRef.current = 0;
+    strugglePhaseRef.current = 0;
+    struggleTimerRef.current = 0;
+
+    // ui
+    setIsDraggingUi(false);
+    setPose(standCasual);
+    setDuration(120);
+    setFacing("left");
+  };
+
+  /* =========================================================================
+     ACTIONS
+  ========================================================================= */
   const syncRunState = () => {
     const canRun = !!directionRef.current && !crouchingRef.current && !draggingRef.current;
     runningRef.current = !!(shiftHeldRef.current && canRun);
@@ -266,7 +364,8 @@ export const Character = ({ mobileMode, darkMode }) => {
     }
   };
 
-  const beginMovement = () => {
+  const beginMovementPose = () => {
+    if (!directionRef.current) return;
     if (crouchingRef.current || draggingRef.current) return;
 
     syncRunState();
@@ -279,7 +378,6 @@ export const Character = ({ mobileMode, darkMode }) => {
     strideTimerRef.current = 0;
 
     if (jumpStateRef.current === "none") setPoseNow(strides[0], frame);
-    ensureLoop();
   };
 
   const setJumpPoseForState = (state) => {
@@ -299,6 +397,7 @@ export const Character = ({ mobileMode, darkMode }) => {
       return;
     }
 
+    // run
     if (state === "prime") {
       setPoseNow(jumpPrime, PRIME_MS);
       return;
@@ -321,9 +420,7 @@ export const Character = ({ mobileMode, darkMode }) => {
 
     sHeldRef.current = true;
     crouchingRef.current = true;
-
     runningRef.current = false;
-    cancelJumpNow();
 
     crouchMovingRef.current = !!directionRef.current;
     crouchPhaseRef.current = 0;
@@ -337,7 +434,8 @@ export const Character = ({ mobileMode, darkMode }) => {
 
   const exitCrouch = () => {
     sHeldRef.current = false;
-    crouchQueuedRef.current = false; // NEW: clear any queued crouch when exiting
+    crouchQueuedRef.current = false;
+
     crouchingRef.current = false;
     crouchMovingRef.current = false;
     crouchTimerRef.current = 0;
@@ -345,27 +443,13 @@ export const Character = ({ mobileMode, darkMode }) => {
 
     syncRunState();
 
-    if (directionRef.current) beginMovement();
-    else {
+    if (directionRef.current) {
+      beginMovementPose();
+      ensureLoop();
+    } else {
       setPoseNow(standCasual, 120);
       stopLoopIfIdle();
     }
-  };
-
-  const updateCrouchModeFromDir = () => {
-    if (!crouchingRef.current) return;
-
-    const shouldMove = !!directionRef.current;
-    if (shouldMove === crouchMovingRef.current) return;
-
-    crouchMovingRef.current = shouldMove;
-    crouchTimerRef.current = 0;
-    crouchPhaseRef.current = 0;
-
-    if (crouchMovingRef.current) setPoseNow(crouchWalk1, CROUCH_FRAME_MS);
-    else setPoseNow(crouch, 200);
-
-    ensureLoop();
   };
 
   const startJump = () => {
@@ -374,6 +458,7 @@ export const Character = ({ mobileMode, darkMode }) => {
     if (jumpStateRef.current !== "none") return;
 
     const dirAtStart = directionRef.current;
+
     syncRunState();
     const isRunning = runningRef.current && !!dirAtStart;
 
@@ -403,6 +488,86 @@ export const Character = ({ mobileMode, darkMode }) => {
     }
   };
 
+  /* =========================================================================
+     INPUT MERGE (keyboard overrides joystick when active)
+  ========================================================================= */
+  const computeJoystickIntent = () => {
+    const mag = joyMagRef.current;
+    const dir8 = joyDir8Ref.current;
+
+    if (mag < JOY_ACTIVE_MAG || !dir8 || dir8 === "center") {
+      return { dir: null, shift: false, jump: false, crouch: false };
+    }
+
+    const sprint = mag >= JOY_SPRINT_MAG;
+
+    // Bottom
+    if (dir8 === "s") return { dir: null, shift: false, jump: false, crouch: true };
+    if (dir8 === "sw") return { dir: "left", shift: false, jump: false, crouch: true };
+    if (dir8 === "se") return { dir: "right", shift: false, jump: false, crouch: true };
+
+    // Top
+    if (dir8 === "n") return { dir: null, shift: false, jump: true, crouch: false };
+    if (dir8 === "nw") return { dir: "left", shift: sprint, jump: true, crouch: false };
+    if (dir8 === "ne") return { dir: "right", shift: sprint, jump: true, crouch: false };
+
+    // Horizontal
+    if (dir8 === "w") return { dir: "left", shift: sprint, jump: false, crouch: false };
+    if (dir8 === "e") return { dir: "right", shift: sprint, jump: false, crouch: false };
+
+    return { dir: null, shift: false, jump: false, crouch: false };
+  };
+
+  const applyMergedInputs = () => {
+    const joy = computeJoystickIntent();
+
+    const dir = kbDirRef.current != null ? kbDirRef.current : joy.dir;
+    const shift = kbShiftRef.current || joy.shift;
+    const wantCrouch = kbCrouchRef.current || joy.crouch;
+    const wantJump = kbJumpRef.current || joy.jump;
+
+    // NEW: record "jump is being held" intent, used for auto-repeat on landing
+    wantJumpHoldRef.current = wantJump;
+
+    const prevDir = directionRef.current;
+    const prevShift = shiftHeldRef.current;
+
+    directionRef.current = dir;
+    shiftHeldRef.current = shift;
+
+    if (dir) setFacing(dir);
+
+    // kick stride pose immediately when (dir/shift) changes on ground
+    if ((prevDir !== dir || prevShift !== shift) && dir && !isAirOrJumping() && !crouchingRef.current) {
+      beginMovementPose();
+    }
+
+    // crouch transitions
+    if (wantCrouch && !sHeldRef.current) {
+      if (isAirOrJumping()) {
+        sHeldRef.current = true;
+        crouchQueuedRef.current = true;
+      } else {
+        enterCrouch();
+      }
+    } else if (!wantCrouch && sHeldRef.current) {
+      if (crouchingRef.current) exitCrouch();
+      else {
+        sHeldRef.current = false;
+        crouchQueuedRef.current = false;
+      }
+    }
+
+    // jump transitions (edge)
+    if (wantJump && !wHeldRef.current) startJump();
+    if (!wantJump && wHeldRef.current) endJumpHold();
+
+    syncRunState();
+  };
+
+  /* =========================================================================
+     DRAGGING
+  ========================================================================= */
   const beginDrag = (e) => {
     if (!wrapperRef.current) return;
 
@@ -411,19 +576,20 @@ export const Character = ({ mobileMode, darkMode }) => {
     dragPtrIdRef.current = e.pointerId;
 
     directionRef.current = null;
+    shiftHeldRef.current = false;
     runningRef.current = false;
+
     if (crouchingRef.current) exitCrouch();
-    cancelJumpNow();
+    jumpStateRef.current = "none";
+    wHeldRef.current = false;
+    vyRef.current = 0;
+    yAirRef.current = 0;
 
     const rect = wrapperRef.current.getBoundingClientRect();
     const cx = rect.left + rect.width * 0.5;
     const cy = rect.top + rect.height * 0.5;
 
-    dragOffsetRef.current = {
-      dx: e.clientX - cx,
-      dy: e.clientY - cy
-    };
-
+    dragOffsetRef.current = { dx: e.clientX - cx, dy: e.clientY - cy };
     dragAbsRef.current = { x: cx, y: cy };
 
     strugglePhaseRef.current = 0;
@@ -455,7 +621,6 @@ export const Character = ({ mobileMode, darkMode }) => {
     dragPtrIdRef.current = null;
 
     const vw = window.innerWidth;
-
     const cx = dragAbsRef.current.x;
     const cy = dragAbsRef.current.y;
 
@@ -481,14 +646,16 @@ export const Character = ({ mobileMode, darkMode }) => {
     stopLoopIfIdle();
   };
 
+  /* =========================================================================
+     MAIN LOOP
+  ========================================================================= */
   const loop = (ts) => {
     if (!lastTsRef.current) lastTsRef.current = ts;
     const rawDt = ts - lastTsRef.current;
     const dt = Math.min(50, rawDt);
     lastTsRef.current = ts;
 
-    syncRunState();
-
+    // drag mode
     if (draggingRef.current) {
       struggleTimerRef.current += dt;
       if (struggleTimerRef.current >= STRUGGLE_FRAME_MS) {
@@ -496,13 +663,15 @@ export const Character = ({ mobileMode, darkMode }) => {
         strugglePhaseRef.current = 1 - strugglePhaseRef.current;
         setPoseNow(strugglePhaseRef.current === 0 ? struggle1 : struggle2, STRUGGLE_FRAME_MS);
       }
-
       applyTransformFromAbs(dragAbsRef.current.x, dragAbsRef.current.y);
-
       rafRef.current = requestAnimationFrame(loop);
       return;
     }
 
+    // merge inputs each frame
+    applyMergedInputs();
+
+    // crouch sim
     if (crouchingRef.current) {
       runningRef.current = false;
       jumpStateRef.current = "none";
@@ -540,6 +709,7 @@ export const Character = ({ mobileMode, darkMode }) => {
       return;
     }
 
+    // horizontal + air control
     const dir = directionRef.current;
     const running = runningRef.current;
 
@@ -569,6 +739,7 @@ export const Character = ({ mobileMode, darkMode }) => {
       }
     }
 
+    // jump state machine
     if (jumpState === "prime") {
       jumpTimerRef.current += dt;
       if (jumpTimerRef.current >= PRIME_MS) {
@@ -592,7 +763,6 @@ export const Character = ({ mobileMode, darkMode }) => {
       setJumpPoseForState("air");
 
       if (vyRef.current > 0 && yAirRef.current >= 0) {
-        // LANDING
         yAirRef.current = 0;
         vyRef.current = 0;
         jumpStateRef.current = "land";
@@ -602,25 +772,30 @@ export const Character = ({ mobileMode, darkMode }) => {
     } else if (jumpState === "land") {
       jumpTimerRef.current += dt;
       if (jumpTimerRef.current >= PRIME_MS) {
-        // FINISH LANDING
         jumpStateRef.current = "none";
         jumpTimerRef.current = 0;
         jumpModeRef.current = "stand";
 
-        syncRunState();
-
-        // NEW: if S was pressed mid-air and still held, crouch immediately on landing
-        if (crouchQueuedRef.current && sHeldRef.current && !draggingRef.current) {
+        // queued crouch on landing
+        if (crouchQueuedRef.current && sHeldRef.current) {
           crouchQueuedRef.current = false;
           enterCrouch();
           rafRef.current = requestAnimationFrame(loop);
           return;
         }
 
-        if (directionRef.current) beginMovement();
+        // NEW: auto-repeat jump while jump is held
+        if (wantJumpHoldRef.current && !draggingRef.current && !crouchingRef.current) {
+          startJump();
+          rafRef.current = requestAnimationFrame(loop);
+          return;
+        }
+
+        if (directionRef.current) beginMovementPose();
         else setPoseNow(standCasual, 120);
       }
     } else {
+      // stride animation
       if (dir) {
         strideTimerRef.current += dt;
 
@@ -639,6 +814,7 @@ export const Character = ({ mobileMode, darkMode }) => {
       }
     }
 
+    // clamps + apply
     xRef.current = clampXToWindow(xRef.current);
 
     const yCeil2 = clampYAirToCeiling(yAirRef.current);
@@ -649,108 +825,48 @@ export const Character = ({ mobileMode, darkMode }) => {
 
     applyTransformFromAir(xRef.current, yAirRef.current);
 
-    if (
-      animatingRef.current &&
-      (directionRef.current || jumpStateRef.current !== "none" || yAirRef.current < 0)
-    ) {
+    if (animatingRef.current && (directionRef.current || jumpStateRef.current !== "none" || yAirRef.current < 0)) {
       rafRef.current = requestAnimationFrame(loop);
     } else {
       stopLoopIfIdle();
     }
   };
 
+  /* =========================================================================
+     JOYSTICK INPUT
+  ========================================================================= */
+  const onJoystickChange = ({ magnitude, dir }) => {
+    joyMagRef.current = magnitude;
+    joyDir8Ref.current = dir || "center";
+    ensureLoop();
+  };
+
   /* ---------------- Keyboard input ---------------- */
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.repeat) return;
-      if (draggingRef.current) return;
 
       const k = e.key.toLowerCase();
 
-      if (k === "s") {
-        // NEW: queue crouch if pressed mid-air; crouch instantly if grounded
-        if (isAirOrJumping()) {
-          sHeldRef.current = true;
-          crouchQueuedRef.current = true;
-          ensureLoop();
-          return;
-        }
+      if (k === "a") kbDirRef.current = "left";
+      if (k === "d") kbDirRef.current = "right";
+      if (k === "shift") kbShiftRef.current = true;
+      if (k === "s") kbCrouchRef.current = true;
+      if (k === "w") kbJumpRef.current = true;
 
-        if (!sHeldRef.current) enterCrouch();
-        return;
-      }
-
-      let dir = null;
-      if (k === "a") dir = "left";
-      if (k === "d") dir = "right";
-
-      if (dir) {
-        directionRef.current = dir;
-        setFacing(dir);
-
-        if (crouchingRef.current) {
-          runningRef.current = false;
-          updateCrouchModeFromDir();
-          ensureLoop();
-          return;
-        }
-
-        syncRunState();
-        beginMovement();
-        return;
-      }
-
-      if (k === "shift") {
-        shiftHeldRef.current = true;
-        syncRunState();
-
-        if (!crouchingRef.current && !isAirOrJumping() && directionRef.current) beginMovement();
-        return;
-      }
-
-      if (k === "w") {
-        if (crouchingRef.current) return;
-        startJump();
-      }
+      ensureLoop();
     };
 
     const onKeyUp = (e) => {
       const k = e.key.toLowerCase();
 
-      if (k === "s") {
-        // NEW: releasing S cancels queued crouch (and exits if already crouching)
-        sHeldRef.current = false;
-        crouchQueuedRef.current = false;
-        if (crouchingRef.current) exitCrouch();
-        return;
-      }
+      if (k === "a" && kbDirRef.current === "left") kbDirRef.current = null;
+      if (k === "d" && kbDirRef.current === "right") kbDirRef.current = null;
+      if (k === "shift") kbShiftRef.current = false;
+      if (k === "s") kbCrouchRef.current = false;
+      if (k === "w") kbJumpRef.current = false;
 
-      if (
-        (k === "a" && directionRef.current === "left") ||
-        (k === "d" && directionRef.current === "right")
-      ) {
-        directionRef.current = null;
-
-        if (crouchingRef.current) {
-          updateCrouchModeFromDir();
-          ensureLoop();
-          return;
-        }
-
-        syncRunState();
-        stopLoopIfIdle();
-        return;
-      }
-
-      if (k === "shift") {
-        shiftHeldRef.current = false;
-        syncRunState();
-
-        if (!crouchingRef.current && !isAirOrJumping() && directionRef.current) beginMovement();
-        return;
-      }
-
-      if (k === "w") endJumpHold();
+      ensureLoop();
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -759,35 +875,45 @@ export const Character = ({ mobileMode, darkMode }) => {
     return () => {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ---------------- Init + resize ---------------- */
+  /* ---------------- Init + resize + MOUNT/UNMOUNT SAFETY ---------------- */
   useEffect(() => {
-    xRef.current = 0;
-    yAirRef.current = 0;
-
+    // mount reset
+    hardReset();
     recomputeGroundY();
     applyTransformFromAir(xRef.current, yAirRef.current);
 
     const onResize = () => {
       if (draggingRef.current) return;
-
       recomputeGroundY();
-
       xRef.current = clampXToWindow(xRef.current);
       yAirRef.current = clampYAirToCeiling(yAirRef.current);
       applyTransformFromAir(xRef.current, yAirRef.current);
     };
 
     window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
+
+    return () => {
+      window.removeEventListener("resize", onResize);
+
+      // release pointer capture if needed
+      try {
+        if (wrapperRef.current && dragPtrIdRef.current != null) {
+          wrapperRef.current.releasePointerCapture(dragPtrIdRef.current);
+        }
+      } catch (_) {
+        // ignore
+      }
+
+      // unmount cleanup
+      hardReset();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /* ---------------- Recalc ground ONCE when mobileMode/scale changes ---------------- */
+  /* ---------------- Ground recalc when scale changes ---------------- */
   useEffect(() => {
     if (draggingRef.current) return;
 
@@ -799,12 +925,25 @@ export const Character = ({ mobileMode, darkMode }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mobileMode, HUMAN_SCALE]);
 
+  /* ---------------- Place joystick nicely on mobile ---------------- */
+  useEffect(() => {
+    if (!mobileMode) return;
+    setJoyPos((p) => {
+      const isDefault = p.x === 24 && p.y === 24;
+      if (!isDefault) return p;
+      const y = Math.max(24, window.innerHeight - 200);
+      return { x: 24, y };
+    });
+  }, [mobileMode]);
+
   /* ---------------- Re-render HumanAnimator on mode/theme changes ---------------- */
   const animatorKey = `${mobileMode ? "m" : "d"}-${darkMode ? "dark" : "light"}-${HUMAN_SCALE}`;
 
   /* ---------------- Render ---------------- */
   return (
-    <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
+    // IMPORTANT: this overlay must NOT block the rest of the site
+    <div style={{ position: "fixed", inset: 0, overflow: "hidden", pointerEvents: "none", zIndex: 10000 }}>
+      {/* Character (interactive) */}
       <div
         ref={wrapperRef}
         onPointerDown={(e) => {
@@ -856,6 +995,17 @@ export const Character = ({ mobileMode, darkMode }) => {
           />
         </div>
       </div>
+
+      {/* Joystick (interactive within itself; stops propagation internally) */}
+      {mobileMode && (
+        <Joystick
+          size={140}
+          deadZone={12}
+          initialPosition={joyPos}
+          onChange={onJoystickChange}
+          onPositionChange={(p) => setJoyPos(p)}
+        />
+      )}
     </div>
   );
 };
