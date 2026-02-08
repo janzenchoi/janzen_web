@@ -24,7 +24,8 @@ export const JanzenActivity = ({ mobileMode, darkMode, activityController }) => 
   const desktopDescription = [
     "Drag and release to forcibly relocate",
     "Press A / D to walk left / right",
-    "Press W / S to jump / crouch",
+    "Press W to jump",
+    "Press S to crouch",
     "Press SHIFT to sprint",
     // "Press 1-9 to emote."
   ];
