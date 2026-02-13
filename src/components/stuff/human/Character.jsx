@@ -74,6 +74,7 @@ export const Character = ({ mobileMode, darkMode }) => {
      MANUAL GROUND CONFIG (EDIT HERE)
   ========================================================================= */
   const HUMAN_SCALE = mobileMode ? 0.6 : 1.0;
+  const JUMP_SCALE = mobileMode ? 0.8 : 1.0;
 
   // EDIT HERE
   const BASE_GROUND_PX_FROM_BOTTOM = 155; // px @ scale=1
@@ -89,9 +90,9 @@ export const Character = ({ mobileMode, darkMode }) => {
   const PRIME_MS = 100;
   const TAP_THRESHOLD = 200;
 
-  const BASE_WALK_VELOCITY = 0.40;
-  const BASE_RUN_VELOCITY = 0.80;
-  const BASE_CROUCH_VELOCITY = 0.10;
+  const BASE_WALK_VELOCITY = 0.50;
+  const BASE_RUN_VELOCITY = 1.0;
+  const BASE_CROUCH_VELOCITY = 0.12;
 
   const WALK_VELOCITY = BASE_WALK_VELOCITY * HUMAN_SCALE;
   const RUN_VELOCITY = BASE_RUN_VELOCITY * HUMAN_SCALE;
@@ -101,27 +102,23 @@ export const Character = ({ mobileMode, darkMode }) => {
   const BASE_WALK_JUMP_BOOST = 0.24;
   const BASE_RUN_JUMP_BOOST = 0.44;
 
-  const WALK_JUMP_BOOST = BASE_WALK_JUMP_BOOST * HUMAN_SCALE;
-  const RUN_JUMP_BOOST = BASE_RUN_JUMP_BOOST * HUMAN_SCALE;
+  const WALK_JUMP_BOOST = BASE_WALK_JUMP_BOOST;
+  const RUN_JUMP_BOOST = BASE_RUN_JUMP_BOOST;
 
   const STAND_AIR_CONTROL_MULT = 0.50;
   const BASE_STAND_AIR_CONTROL_CAP = 0.10;
   const STAND_AIR_CONTROL_CAP = BASE_STAND_AIR_CONTROL_CAP * HUMAN_SCALE;
 
-  const BASE_GRAVITY_UP = 0.0016;
-  const BASE_GRAVITY_CUT = 0.0040;
-  const BASE_GRAVITY_DOWN = 0.0052;
-
-  const GRAVITY_UP = BASE_GRAVITY_UP * HUMAN_SCALE;
-  const GRAVITY_CUT = BASE_GRAVITY_CUT * HUMAN_SCALE;
-  const GRAVITY_DOWN = BASE_GRAVITY_DOWN * HUMAN_SCALE;
+  const GRAVITY_UP = 0.0020;
+  const GRAVITY_CUT = 0.0050;
+  const GRAVITY_DOWN = 0.0065;
 
   const BASE_JUMP_VY_TAP = -0.70;
   const BASE_JUMP_VY_HOLD = -0.90;
   const RUN_JUMP_VY_MULT = 1.05;
 
-  const JUMP_VY_TAP = BASE_JUMP_VY_TAP * HUMAN_SCALE;
-  const JUMP_VY_HOLD = BASE_JUMP_VY_HOLD * HUMAN_SCALE;
+  const JUMP_VY_TAP = BASE_JUMP_VY_TAP * JUMP_SCALE;
+  const JUMP_VY_HOLD = BASE_JUMP_VY_HOLD * JUMP_SCALE;
 
   /* =========================================================================
      JOYSTICK THRESHOLDS (EDIT HERE)
