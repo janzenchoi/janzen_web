@@ -83,14 +83,14 @@ export const ActivityBullet = ({
   const AdditionalDescription = () => {
     const descriptionStyle = {
       ...textStyle,
-      marginTop: "0.2rem",
+      marginTop: "0rem",
       textAlign: mobileMode ? "start" : "justify",
       display: "block"
     };
     return (
       <div style={{ display: "flex", flexDirection: "row", alignItems: "flex-start" }}>
         <div style={verticalDividerStyle} />
-        <div>{description.map((text, idx) => {
+        <div style={{ marginTop: "0.4rem" }}>{description.map((text, idx) => {
           return (
             <div key={idx} style={descriptionStyle}>{text}
             </div>
